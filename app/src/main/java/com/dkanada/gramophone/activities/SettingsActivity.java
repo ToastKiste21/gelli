@@ -94,8 +94,6 @@ public class SettingsActivity extends AbsBaseActivity {
             }
 
             if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
-                downloadLocationPreference.setEnabled(false);
-
                 // stock Android 11 removed the album cover on lock screens
                 // supported on LineageOS so we might want to add a check at some point
                 showAlbumCoverPreference.setEnabled(false);

@@ -134,4 +134,12 @@
     <string name="sort_method_artist">Artiest</string>
     <string name="sort_method_album">Album</string>
     <string name="sort_method_year">Jaar</string>
+    <string name="pref_title_gain_adjustment">Volumeversterking</string>
+    <string name="pref_summary_gain_adjustment">Versterking van de speleruitvoer aanpassen</string>
+    <string name="pref_title_replay_gain">ReplayGain</string>
+    <string name="pref_summary_replay_gain">Volume normaliseren met door de server geanalyseerde versterkingsgegevens</string>
+    <string name="pref_title_replay_gain_preamp">Voorversterker (met tags)</string>
+    <string name="pref_summary_replay_gain_preamp">Volume aanpassen wanneer versterkingstags aanwezig zijn (-10 tot +10 dB)</string>
+    <string name="pref_title_replay_gain_preamp_no_tag">Voorversterker (zonder tags)</string>
+    <string name="pref_summary_replay_gain_preamp_no_tag">Volume aanpassen wanneer versterkingstags afwezig zijn (-10 tot +10 dB)</string>
 </resources>

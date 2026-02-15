@@ -106,4 +106,12 @@
     <string name="login">Entrar</string>
     <string name="username">Nome de utilizador</string>
     <string name="password">Senha</string>
+    <string name="pref_title_gain_adjustment">Ajuste de ganho</string>
+    <string name="pref_summary_gain_adjustment">Ajustar o ganho da saída do leitor</string>
+    <string name="pref_title_replay_gain">ReplayGain</string>
+    <string name="pref_summary_replay_gain">Normalizar o volume utilizando dados de ganho analisados pelo servidor</string>
+    <string name="pref_title_replay_gain_preamp">Pré-amplificador (com etiquetas)</string>
+    <string name="pref_summary_replay_gain_preamp">Ajustar o volume quando existem etiquetas de ganho (-10 a +10 dB)</string>
+    <string name="pref_title_replay_gain_preamp_no_tag">Pré-amplificador (sem etiquetas)</string>
+    <string name="pref_summary_replay_gain_preamp_no_tag">Ajustar o volume quando não existem etiquetas de ganho (-10 a +10 dB)</string>
 </resources>

@@ -134,4 +134,12 @@
     <string name="sort_method_artist">Sanatçı</string>
     <string name="sort_method_album">Albüm</string>
     <string name="sort_method_year">Yıl</string>
+    <string name="pref_title_gain_adjustment">Kazanç ayarı</string>
+    <string name="pref_summary_gain_adjustment">Oynatıcı çıkışının kazancını ayarla</string>
+    <string name="pref_title_replay_gain">ReplayGain</string>
+    <string name="pref_summary_replay_gain">Sunucu tarafından analiz edilen kazanç verileriyle ses seviyesini normalleştir</string>
+    <string name="pref_title_replay_gain_preamp">Ön amplifikatör (etiketli)</string>
+    <string name="pref_summary_replay_gain_preamp">Kazanç etiketleri mevcut olduğunda ses seviyesini ayarla (-10 ile +10 dB)</string>
+    <string name="pref_title_replay_gain_preamp_no_tag">Ön amplifikatör (etiketsiz)</string>
+    <string name="pref_summary_replay_gain_preamp_no_tag">Kazanç etiketleri mevcut olmadığında ses seviyesini ayarla (-10 ile +10 dB)</string>
 </resources>

@@ -171,4 +171,12 @@
     <string name="source">Source</string>
     <string name="unlimited">Illimité</string>
     <string name="select_all_title">Sélectionner tout</string>
+    <string name="pref_title_gain_adjustment">Ajustement du gain</string>
+    <string name="pref_summary_gain_adjustment">Ajuster le gain de la sortie du lecteur</string>
+    <string name="pref_title_replay_gain">ReplayGain</string>
+    <string name="pref_summary_replay_gain">Normaliser le volume en utilisant les données de gain analysées par le serveur</string>
+    <string name="pref_title_replay_gain_preamp">Préampli (avec tags)</string>
+    <string name="pref_summary_replay_gain_preamp">Ajuster le volume lorsque des tags de gain sont présents (-10 à +10 dB)</string>
+    <string name="pref_title_replay_gain_preamp_no_tag">Préampli (sans tags)</string>
+    <string name="pref_summary_replay_gain_preamp_no_tag">Ajuster le volume lorsque les tags de gain sont absents (-10 à +10 dB)</string>
 </resources>

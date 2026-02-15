@@ -11,10 +11,13 @@
     <uses-permission android:name="android.permission.BROADCAST_STICKY" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:name=".App"
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:networkSecurityConfig="@xml/network_security_config"
@@ -24,12 +27,13 @@
         tools:ignore="UnusedAttribute">
         <activity
             android:name=".activities.MainActivity"
+            android:exported="false"
             android:launchMode="singleTop" />
-        <activity android:name=".activities.details.AlbumDetailActivity" />
-        <activity android:name=".activities.details.ArtistDetailActivity" />
-        <activity android:name=".activities.details.GenreDetailActivity" />
-        <activity android:name=".activities.details.PlaylistDetailActivity" />
-        <activity android:name=".activities.SearchActivity" />
+        <activity android:name=".activities.details.AlbumDetailActivity" android:exported="false" />
+        <activity android:name=".activities.details.ArtistDetailActivity" android:exported="false" />
+        <activity android:name=".activities.details.GenreDetailActivity" android:exported="false" />
+        <activity android:name=".activities.details.PlaylistDetailActivity" android:exported="false" />
+        <activity android:name=".activities.SearchActivity" android:exported="false" />
         <activity android:name=".activities.SplashActivity" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -49,26 +53,36 @@
         </activity>
         <activity
             android:name=".activities.SettingsActivity"
+            android:exported="false"
             android:label="@string/action_settings" />
         <activity
             android:name=".activities.AboutActivity"
+            android:exported="false"
             android:label="@string/action_about" />
         <activity
             android:name=".activities.LoginActivity"
+            android:exported="false"
             android:label="@string/action_login"
             android:theme="@style/LoginScreen" />
         <activity
             android:name=".activities.SelectActivity"
+            android:exported="false"
             android:label="@string/select"
             android:theme="@style/LoginScreen" />
         <activity
             android:name=".views.shortcuts.AppShortcutLauncherActivity"
+            android:exported="false"
             android:launchMode="singleInstance"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
 
-        <service android:name=".service.DownloadService" />
-        <service android:name=".service.LoginService" />
-        <service android:name=".service.MusicService" />
+        <service android:name=".service.DownloadService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
+        <service android:name=".service.LoginService"
+            android:exported="false" />
+        <service android:name=".service.MusicService"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback" />
 
         <receiver android:name=".service.receivers.MediaButtonIntentReceiver" android:exported="false">
             <intent-filter>

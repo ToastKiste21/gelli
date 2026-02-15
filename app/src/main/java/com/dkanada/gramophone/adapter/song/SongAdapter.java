@@ -31,7 +31,10 @@ import com.dkanada.gramophone.util.NavigationUtil;
 import com.dkanada.gramophone.util.PreferenceUtil;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.Executors;
 
 public class SongAdapter extends AbsMultiSelectAdapter<SongAdapter.ViewHolder, Song> implements FastScrollRecyclerView.SectionedAdapter {
     protected final AppCompatActivity activity;
@@ -41,6 +44,8 @@ public class SongAdapter extends AbsMultiSelectAdapter<SongAdapter.ViewHolder, S
 
     protected boolean usePalette;
     protected boolean showSectionName;
+
+    private volatile Set<String> cachedIds = new HashSet<>();
 
     public SongAdapter(AppCompatActivity activity, List<Song> dataSet, @LayoutRes int itemLayoutRes, boolean usePalette, @Nullable CabHolder cabHolder) {
         this(activity, dataSet, itemLayoutRes, usePalette, cabHolder, true);
@@ -56,10 +61,19 @@ public class SongAdapter extends AbsMultiSelectAdapter<SongAdapter.ViewHolder, S
         this.showSectionName = showSectionName;
 
         setHasStableIds(true);
+        refreshCachedIds();
+    }
+
+    public void refreshCachedIds() {
+        Executors.newSingleThreadExecutor().execute(() -> {
+            List<String> ids = App.getDatabase().cacheDao().getAllCachedIds();
+            cachedIds = new HashSet<>(ids);
+        });
     }
 
     public void swapDataSet(List<Song> dataSet) {
         this.dataSet = dataSet;
+        refreshCachedIds();
         notifyDataSetChanged();
     }
 
@@ -114,11 +128,7 @@ public class SongAdapter extends AbsMultiSelectAdapter<SongAdapter.ViewHolder, S
         }
 
         if (holder.cached != null) {
-            if (App.getDatabase().cacheDao().isCached(song.id)) {
-                holder.cached.setVisibility(View.VISIBLE);
-            } else {
-                holder.cached.setVisibility(View.GONE);
-            }
+            holder.cached.setVisibility(cachedIds.contains(song.id) ? View.VISIBLE : View.GONE);
         }
 
         loadAlbumCover(song, holder);

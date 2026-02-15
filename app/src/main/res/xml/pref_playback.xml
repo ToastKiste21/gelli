@@ -52,6 +52,31 @@
             android:summary="@string/pref_summary_gain_adjustment"
             android:title="@string/pref_title_gain_adjustment"/>
 
+        <SwitchPreference
+            app:iconSpaceReserved="false"
+            android:defaultValue="false"
+            android:key="replay_gain_enabled"
+            android:summary="@string/pref_summary_replay_gain"
+            android:title="@string/pref_title_replay_gain" />
+
+        <SeekBarPreference
+            app:iconSpaceReserved="false"
+            android:defaultValue="10"
+            android:max="20"
+            android:dependency="replay_gain_enabled"
+            android:key="replay_gain_preamp"
+            android:summary="@string/pref_summary_replay_gain_preamp"
+            android:title="@string/pref_title_replay_gain_preamp" />
+
+        <SeekBarPreference
+            app:iconSpaceReserved="false"
+            android:defaultValue="10"
+            android:max="20"
+            android:dependency="replay_gain_enabled"
+            android:key="replay_gain_preamp_no_tag"
+            android:summary="@string/pref_summary_replay_gain_preamp_no_tag"
+            android:title="@string/pref_title_replay_gain_preamp_no_tag" />
+
     </com.dkanada.gramophone.views.settings.JellyPreferenceCategory>
 
 </androidx.preference.PreferenceScreen>

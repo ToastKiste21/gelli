@@ -99,6 +99,7 @@
                 android:layout_marginEnd="16dp"
                 android:layout_marginTop="8dp"
                 app:cardBackgroundColor="?cardBackgroundColor"
+                app:cardCornerRadius="16dp"
                 app:cardElevation="@dimen/card_elevation"
                 app:cardUseCompatPadding="false">
 
@@ -133,7 +134,7 @@
                             android:paddingLeft="16dp"
                             android:paddingRight="16dp"
                             android:text="@string/up_next"
-                            android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                            android:textAppearance="@style/TextAppearance.Material3.LabelLarge"
                             android:textColor="?android:textColorSecondary" />
 
                         <androidx.recyclerview.widget.RecyclerView

@@ -47,19 +47,20 @@ import com.dkanada.gramophone.service.notifications.PlayingNotificationNougat;
 import com.dkanada.gramophone.service.playback.LocalPlayer;
 import com.dkanada.gramophone.service.playback.Playback;
 import com.dkanada.gramophone.service.playback.PlaybackListener;
+import com.dkanada.gramophone.service.playback.ReplayGainAudioProcessor;
 import com.dkanada.gramophone.service.receivers.MediaButtonIntentReceiver;
 import com.dkanada.gramophone.util.PreferenceUtil;
+import com.dkanada.gramophone.util.ReplayGainFetcher;
 import com.dkanada.gramophone.util.Util;
 import com.dkanada.gramophone.views.widgets.AppWidgetAlbum;
 import com.dkanada.gramophone.views.widgets.AppWidgetCard;
 import com.dkanada.gramophone.views.widgets.AppWidgetClassic;
-import com.google.android.exoplayer2.Player;
+import androidx.media3.common.Player;
 
 import org.jellyfin.apiclient.interaction.EmptyResponse;
 import org.jellyfin.apiclient.interaction.Response;
 import org.jellyfin.apiclient.model.session.PlaybackProgressInfo;
 import org.jellyfin.apiclient.model.session.PlaybackStartInfo;
-import org.jellyfin.apiclient.model.session.PlaybackStopInfo;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -71,9 +72,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import static com.google.android.exoplayer2.Player.MEDIA_ITEM_TRANSITION_REASON_AUTO;
-import static com.google.android.exoplayer2.Player.MEDIA_ITEM_TRANSITION_REASON_PLAYLIST_CHANGED;
-import static com.google.android.exoplayer2.Player.PLAY_WHEN_READY_CHANGE_REASON_END_OF_MEDIA_ITEM;
+import static androidx.media3.common.Player.MEDIA_ITEM_TRANSITION_REASON_AUTO;
+import static androidx.media3.common.Player.MEDIA_ITEM_TRANSITION_REASON_PLAYLIST_CHANGED;
+import static androidx.media3.common.Player.PLAY_WHEN_READY_CHANGE_REASON_END_OF_MEDIA_ITEM;
 
 public class MusicService extends Service implements SharedPreferences.OnSharedPreferenceChangeListener {
     public static final String PACKAGE_NAME = BuildConfig.APPLICATION_ID;
@@ -191,6 +192,15 @@ public class MusicService extends Service implements SharedPreferences.OnSharedP
         }
     };
 
+    private final BroadcastReceiver downloadCompleteReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, @NonNull Intent intent) {
+            if (DownloadService.ACTION_DOWNLOAD_COMPLETE.equals(intent.getAction())) {
+                playback.setQueue(queueManager.getPlayingQueue(), queueManager.getPosition(), 0, false);
+            }
+        }
+    };
+
     private final BroadcastReceiver becomingNoisyReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, @NonNull Intent intent) {
@@ -253,8 +263,15 @@ public class MusicService extends Service implements SharedPreferences.OnSharedP
         throttledSeekHandler = new ThrottledSeekHandler(new Handler());
         uiThreadHandler = new Handler();
 
-        registerReceiver(widgetIntentReceiver, new IntentFilter(INTENT_EXTRA_WIDGET_UPDATE));
-        registerReceiver(becomingNoisyReceiver, new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            registerReceiver(widgetIntentReceiver, new IntentFilter(INTENT_EXTRA_WIDGET_UPDATE), Context.RECEIVER_NOT_EXPORTED);
+            registerReceiver(becomingNoisyReceiver, new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY), Context.RECEIVER_NOT_EXPORTED);
+            registerReceiver(downloadCompleteReceiver, new IntentFilter(DownloadService.ACTION_DOWNLOAD_COMPLETE), Context.RECEIVER_NOT_EXPORTED);
+        } else {
+            registerReceiver(widgetIntentReceiver, new IntentFilter(INTENT_EXTRA_WIDGET_UPDATE));
+            registerReceiver(becomingNoisyReceiver, new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY));
+            registerReceiver(downloadCompleteReceiver, new IntentFilter(DownloadService.ACTION_DOWNLOAD_COMPLETE));
+        }
 
         PreferenceUtil.getInstance(this).registerOnSharedPreferenceChangedListener(this);
 
@@ -378,6 +395,7 @@ public class MusicService extends Service implements SharedPreferences.OnSharedP
     public void onDestroy() {
         unregisterReceiver(widgetIntentReceiver);
         unregisterReceiver(becomingNoisyReceiver);
+        unregisterReceiver(downloadCompleteReceiver);
 
         progressHandler.sendEmptyMessage(TRACK_ENDED);
         mediaSession.setActive(false);
@@ -404,6 +422,8 @@ public class MusicService extends Service implements SharedPreferences.OnSharedP
         @Override
         public void handleMessage(@NonNull Message msg) {
             final MusicService service = mService.get();
+            if (service == null) return;
+
             switch (msg.what) {
                 case LOAD_QUEUE:
                     service.restoreQueuesAndPositionIfNecessary();
@@ -620,7 +640,9 @@ public class MusicService extends Service implements SharedPreferences.OnSharedP
     }
 
     private void sendChangeInternal(final String what) {
-        sendBroadcast(new Intent(what));
+        Intent intent = new Intent(what);
+        intent.setPackage(getPackageName());
+        sendBroadcast(intent);
 
         appWidgetAlbum.notifyChange(this, what, null);
         appWidgetClassic.notifyChange(this, what, null);
@@ -681,6 +703,16 @@ public class MusicService extends Service implements SharedPreferences.OnSharedP
             case PreferenceUtil.GAIN_OFFSET:
                 playback.setVolume(PreferenceUtil.getInstance(this).getGainOffset());
                 break;
+            case PreferenceUtil.REPLAY_GAIN_ENABLED:
+            case PreferenceUtil.REPLAY_GAIN_PREAMP:
+            case PreferenceUtil.REPLAY_GAIN_PREAMP_NO_TAG:
+                if (playback instanceof LocalPlayer) {
+                    ReplayGainAudioProcessor p = ((LocalPlayer) playback).getReplayGainProcessor();
+                    PreferenceUtil prefs = PreferenceUtil.getInstance(this);
+                    p.setEnabled(prefs.getReplayGainEnabled());
+                    p.setPreAmpDb(prefs.getReplayGainPreAmp());
+                }
+                break;
         }
     }
 
@@ -725,17 +757,23 @@ public class MusicService extends Service implements SharedPreferences.OnSharedP
 
         @Override
         public void handleMessage(@NonNull final Message msg) {
-            Song song = mService.get().queueManager.getCurrentSong();
+            MusicService service = mService.get();
+            if (service == null) return;
+
+            Song song = service.queueManager.getCurrentSong();
             if (song == null) return;
 
             switch (msg.what) {
                 case TRACK_STARTED:
                     onStart();
+                    onNext();
+                    break;
                 case TRACK_CHANGED:
                     onNext();
                     break;
                 case TRACK_ENDED:
                     onStop();
+                    break;
             }
         }
 
@@ -747,38 +785,59 @@ public class MusicService extends Service implements SharedPreferences.OnSharedP
         }
 
         public void onNext() {
-            PlaybackStartInfo startInfo = new PlaybackStartInfo();
+            MusicService service = mService.get();
+            if (service == null) return;
 
-            startInfo.setItemId(mService.get().queueManager.getCurrentSong().id);
-            startInfo.setVolumeLevel(mService.get().playback.getVolume());
+            Song current = service.queueManager.getCurrentSong();
+            if (current == null) return;
+
+            PlaybackStartInfo startInfo = new PlaybackStartInfo();
+            startInfo.setItemId(current.id);
+            startInfo.setVolumeLevel(service.playback.getVolume());
             startInfo.setCanSeek(true);
             startInfo.setIsPaused(false);
 
             App.getApiClient().ensureWebSocket();
             App.getApiClient().ReportPlaybackStartAsync(startInfo, new EmptyResponse());
+
+            // ReplayGain: fetch and apply normalization gain
+            if (service.playback instanceof LocalPlayer) {
+                LocalPlayer localPlayer = (LocalPlayer) service.playback;
+                ReplayGainAudioProcessor processor = localPlayer.getReplayGainProcessor();
+                PreferenceUtil prefs = PreferenceUtil.getInstance(service);
+                boolean rgEnabled = prefs.getReplayGainEnabled();
+                processor.setEnabled(rgEnabled);
+                if (rgEnabled) {
+                    float gain = ReplayGainFetcher.fetchNormalizationGain(current.id);
+                    processor.setGainDb(gain);
+                    processor.setPreAmpDb(gain != 0f ? prefs.getReplayGainPreAmp() : prefs.getReplayGainPreAmpNoTag());
+                } else {
+                    processor.setGainDb(0f);
+                }
+            }
         }
 
         public void onProgress() {
-            PlaybackProgressInfo progressInfo = new PlaybackProgressInfo();
-            Song current = mService.get().queueManager.getCurrentSong();
+            MusicService service = mService.get();
+            if (service == null) return;
+
+            Song current = service.queueManager.getCurrentSong();
+            if (current == null) return;
+
             String user = App.getApiClient().getCurrentUserId();
             Date time = new Date(System.currentTimeMillis());
 
-            if (current == null) {
-                return;
-            }
-
-            // TODO these cause a wrong thread error
-            long progress = mService.get().getSongProgressMillis();
-            double duration = mService.get().getSongDurationMillis();
-            if (progress / duration > 0.9) {
+            long progress = service.getSongProgressMillis();
+            double duration = service.getSongDurationMillis();
+            if (duration > 0 && progress / duration > 0.9) {
                 App.getApiClient().MarkPlayedAsync(current.id, user, time, new Response<>());
             }
 
+            PlaybackProgressInfo progressInfo = new PlaybackProgressInfo();
             progressInfo.setItemId(current.id);
             progressInfo.setPositionTicks(progress * 10000);
-            progressInfo.setVolumeLevel(mService.get().playback.getVolume());
-            progressInfo.setIsPaused(!mService.get().playback.isPlaying());
+            progressInfo.setVolumeLevel(service.playback.getVolume());
+            progressInfo.setIsPaused(!service.playback.isPlaying());
             progressInfo.setPlaySessionId(Integer.toString(current.id.hashCode()));
             progressInfo.setCanSeek(true);
 
@@ -786,12 +845,6 @@ public class MusicService extends Service implements SharedPreferences.OnSharedP
         }
 
         public void onStop() {
-            PlaybackStopInfo info = new PlaybackStopInfo();
-            long progress = mService.get().getSongProgressMillis();
-
-            info.setItemId(mService.get().queueManager.getCurrentSong().id);
-            info.setPositionTicks(progress * 10000);
-
             if (task != null) task.cancel(true);
             if (executorService != null) executorService.shutdownNow();
         }

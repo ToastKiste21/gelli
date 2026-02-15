@@ -43,6 +43,9 @@ public class SongMenuHelper {
             case R.id.action_download:
                 NavigationUtil.startDownload(activity, Collections.singletonList(song));
                 return true;
+            case R.id.action_remove_download:
+                NavigationUtil.removeDownload(activity, song);
+                return true;
             case R.id.action_go_to_album:
                 NavigationUtil.startAlbum(activity, new Album(song), null);
                 return true;

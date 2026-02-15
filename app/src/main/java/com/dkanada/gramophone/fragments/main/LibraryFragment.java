@@ -56,8 +56,9 @@ public class LibraryFragment extends AbsMainActivityFragment implements ViewPage
     @Override
     public void onDestroyView() {
         PreferenceUtil.getInstance(getActivity()).unregisterOnSharedPreferenceChangedListener(this);
-        super.onDestroyView();
         binding.pager.removeOnPageChangeListener(this);
+        super.onDestroyView();
+        binding = null;
     }
 
     @Override

@@ -4,11 +4,15 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.Settings;
+import android.widget.Toast;
 
 import androidx.core.app.ActivityOptionsCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.util.Pair;
 
+import com.dkanada.gramophone.R;
 import com.dkanada.gramophone.activities.LoginActivity;
 import com.dkanada.gramophone.activities.MainActivity;
 import com.dkanada.gramophone.activities.SelectActivity;
@@ -117,6 +121,11 @@ public class NavigationUtil {
         intent.putExtra(DownloadService.EXTRA_SONGS, new ArrayList<>(songs));
         intent.setAction(DownloadService.ACTION_START);
 
-        activity.startService(intent);
+        ContextCompat.startForegroundService(activity, intent);
+    }
+
+    public static void removeDownload(Activity activity, Song song) {
+        MusicUtil.deleteDownload(song);
+        Toast.makeText(activity, R.string.download_removed, Toast.LENGTH_SHORT).show();
     }
 }

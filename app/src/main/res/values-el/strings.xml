@@ -115,4 +115,12 @@
     <string name="username">Όνομα Χρήστη</string>
     <string name="password">Κωδικός Πρόσβασης</string>
     <string name="playlist_is_empty">Η Λίστα αναπαραγωγής είναι κενή</string>
+    <string name="pref_title_gain_adjustment">Ρύθμιση κέρδους</string>
+    <string name="pref_summary_gain_adjustment">Ρύθμιση του κέρδους εξόδου του αναπαραγωγέα</string>
+    <string name="pref_title_replay_gain">ReplayGain</string>
+    <string name="pref_summary_replay_gain">Κανονικοποίηση έντασης χρησιμοποιώντας δεδομένα κέρδους που αναλύθηκαν από τον διακομιστή</string>
+    <string name="pref_title_replay_gain_preamp">Προενισχυτής (με ετικέτες)</string>
+    <string name="pref_summary_replay_gain_preamp">Ρύθμιση έντασης όταν υπάρχουν ετικέτες κέρδους (-10 έως +10 dB)</string>
+    <string name="pref_title_replay_gain_preamp_no_tag">Προενισχυτής (χωρίς ετικέτες)</string>
+    <string name="pref_summary_replay_gain_preamp_no_tag">Ρύθμιση έντασης όταν απουσιάζουν ετικέτες κέρδους (-10 έως +10 dB)</string>
 </resources>

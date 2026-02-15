@@ -5,7 +5,7 @@ import android.content.Context;
 import com.dkanada.gramophone.App;
 import com.dkanada.gramophone.model.Song;
 import com.dkanada.gramophone.util.PreferenceUtil;
-import com.google.android.exoplayer2.Player;
+import androidx.media3.common.Player;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -133,15 +133,18 @@ public class QueueManager {
 
                 break;
             case SHUFFLE_MODE_NONE:
-                String currentSongId = getCurrentSong().id;
+                Song currentSong2 = getCurrentSong();
+                String currentSongId = currentSong2 != null ? currentSong2.id : null;
                 int newPosition = 0;
 
-                Optional<Song> currentSong = playingQueue.stream()
-                        .filter(song -> song.id.equals(currentSongId))
-                        .findFirst();
+                if (currentSongId != null) {
+                    Optional<Song> match = playingQueue.stream()
+                            .filter(song -> song.id.equals(currentSongId))
+                            .findFirst();
 
-                if (currentSong.isPresent()) {
-                    newPosition = playingQueue.indexOf(currentSong.get());
+                    if (match.isPresent()) {
+                        newPosition = playingQueue.indexOf(match.get());
+                    }
                 }
 
                 shuffledQueue = new ArrayList<>(playingQueue);

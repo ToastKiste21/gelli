@@ -45,7 +45,7 @@
                 app:layout_scrollFlags="scroll"
                 tools:ignore="UnusedAttribute">
 
-                <ImageView
+                <com.google.android.material.imageview.ShapeableImageView
                     android:id="@+id/image"
                     android:layout_width="@dimen/detail_header_image_height"
                     android:layout_height="@dimen/detail_header_image_height"
@@ -53,6 +53,7 @@
                     android:scaleType="centerCrop"
                     android:src="@drawable/default_artist_image"
                     android:transitionName="@string/transition_artist_image"
+                    app:shapeAppearanceOverlay="@style/ShapeAppearance.App.RoundedAlbumArt.Detail"
                     tools:ignore="ContentDescription" />
 
                 <LinearLayout
@@ -84,7 +85,7 @@
                             android:id="@+id/album_count_text"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+                            android:textAppearance="@style/TextAppearance.Material3.BodyMedium" />
 
                     </LinearLayout>
 
@@ -110,7 +111,7 @@
                             android:id="@+id/song_count_text"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+                            android:textAppearance="@style/TextAppearance.Material3.BodyMedium" />
 
                     </LinearLayout>
 
@@ -136,7 +137,7 @@
                             android:id="@+id/duration_text"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+                            android:textAppearance="@style/TextAppearance.Material3.BodyMedium" />
 
                     </LinearLayout>
 

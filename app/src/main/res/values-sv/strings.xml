@@ -46,4 +46,12 @@ Vill du radera spellistan <b>%1$s</b>?
     <string name="pref_title_primary_color">Grundfärg</string>
     <string name="no_playlists">Inga spellistor</string>
     <string name="song">Låt</string>
+    <string name="pref_title_gain_adjustment">Förstärkningsjustering</string>
+    <string name="pref_summary_gain_adjustment">Justera spelarens utgångsförstärkning</string>
+    <string name="pref_title_replay_gain">ReplayGain</string>
+    <string name="pref_summary_replay_gain">Normalisera volymen med serveranalyserade förstärkningsdata</string>
+    <string name="pref_title_replay_gain_preamp">Förförstärkare (med taggar)</string>
+    <string name="pref_summary_replay_gain_preamp">Justera volymen när förstärkningstaggar finns (-10 till +10 dB)</string>
+    <string name="pref_title_replay_gain_preamp_no_tag">Förförstärkare (utan taggar)</string>
+    <string name="pref_summary_replay_gain_preamp_no_tag">Justera volymen när förstärkningstaggar saknas (-10 till +10 dB)</string>
 </resources>

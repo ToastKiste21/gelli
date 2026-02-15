@@ -1,26 +1,22 @@
-# Build
+# Build outputs
 *.apk
+build/
+.gradle/
 
-# Cache
-bin
-gen
-out
-
-# NDK
-*.so
-*.hpp
-*.h
-
-# Gradle
-*.gradle
-*.jar
-gradlew
-gradlew.bat
-build
-
-# Configuration
+# Local configuration
 local.properties
 
-# Other
-.idea
-.vs
+# IDE
+.idea/
+.vs/
+*.iml
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# NDK
+obj/
+
+# Signing
+store.jks

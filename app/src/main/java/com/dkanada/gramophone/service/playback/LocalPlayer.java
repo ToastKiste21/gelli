@@ -2,31 +2,39 @@ package com.dkanada.gramophone.service.playback;
 
 import android.content.Context;
 import android.net.Uri;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.OptIn;
+import androidx.media3.common.AudioAttributes;
+import androidx.media3.common.C;
+import androidx.media3.common.MediaItem;
+import androidx.media3.common.MimeTypes;
+import androidx.media3.common.PlaybackException;
+import androidx.media3.common.Player;
+import androidx.media3.common.util.UnstableApi;
+import androidx.media3.database.StandaloneDatabaseProvider;
+import androidx.media3.datasource.DataSource;
+import androidx.media3.datasource.DefaultDataSource;
+import androidx.media3.datasource.FileDataSource;
+import androidx.media3.datasource.cache.CacheDataSink;
+import androidx.media3.datasource.cache.CacheDataSource;
+import androidx.media3.datasource.cache.LeastRecentlyUsedCacheEvictor;
+import androidx.media3.datasource.cache.SimpleCache;
+import androidx.media3.common.audio.AudioProcessor;
+import androidx.media3.exoplayer.DefaultRenderersFactory;
+import androidx.media3.exoplayer.ExoPlayer;
+import androidx.media3.exoplayer.audio.AudioSink;
+import androidx.media3.exoplayer.audio.DefaultAudioSink;
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory;
 
 import com.dkanada.gramophone.R;
 import com.dkanada.gramophone.model.Song;
 import com.dkanada.gramophone.util.MusicUtil;
 import com.dkanada.gramophone.util.PreferenceUtil;
-import com.google.android.exoplayer2.C;
-import com.google.android.exoplayer2.ExoPlayer;
-import com.google.android.exoplayer2.PlaybackException;
-import com.google.android.exoplayer2.audio.AudioAttributes;
-import com.google.android.exoplayer2.Player;
-import com.google.android.exoplayer2.MediaItem;
-import com.google.android.exoplayer2.database.StandaloneDatabaseProvider;
-import com.google.android.exoplayer2.source.DefaultMediaSourceFactory;
-import com.google.android.exoplayer2.upstream.DataSource;
-import com.google.android.exoplayer2.upstream.DefaultDataSource;
-import com.google.android.exoplayer2.upstream.FileDataSource;
-import com.google.android.exoplayer2.upstream.cache.CacheDataSink;
-import com.google.android.exoplayer2.upstream.cache.CacheDataSource;
-import com.google.android.exoplayer2.upstream.cache.LeastRecentlyUsedCacheEvictor;
-import com.google.android.exoplayer2.upstream.cache.SimpleCache;
-import com.google.android.exoplayer2.util.MimeTypes;
 
 import java.io.File;
 import java.util.List;
@@ -35,46 +43,62 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
+@OptIn(markerClass = UnstableApi.class)
 public class LocalPlayer implements Playback {
     public static final String TAG = LocalPlayer.class.getSimpleName();
 
     private final Context context;
     private final ExoPlayer exoPlayer;
     private final SimpleCache simpleCache;
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
+    private final ReplayGainAudioProcessor replayGainProcessor;
 
     private PlaybackListener listener;
 
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
+
+    // Cached values for thread-safe access from non-main threads
+    private volatile int cachedProgress = 0;
+    private volatile int cachedDuration = 0;
+    private volatile boolean cachedPlayWhenReady = false;
+    private volatile int cachedSuppressionReason = Player.PLAYBACK_SUPPRESSION_REASON_NONE;
+    private volatile int cachedVolume = 0;
 
     @SuppressWarnings("FieldCanBeLocal")
     private final Player.Listener eventListener = new Player.Listener() {
         @Override
         public void onPlayWhenReadyChanged(boolean playWhenReady, int reason) {
             Log.i(TAG, String.format("onPlayWhenReadyChanged: %b %d", playWhenReady, reason));
+            cachedPlayWhenReady = playWhenReady;
+            updateCachedState();
             if (listener != null) listener.onReadyChanged(playWhenReady, reason);
         }
 
         @Override
         public void onPlaybackStateChanged(int state) {
             Log.i(TAG, String.format("onPlaybackStateChanged: %d", state));
+            updateCachedState();
             if (listener != null) listener.onStateChanged(state);
         }
 
         @Override
         public void onPlaybackSuppressionReasonChanged(@Player.PlaybackSuppressionReason int playbackSuppressionReason) {
             Log.i(TAG, String.format("onPlaybackSuppressionReasonChanged: %d", playbackSuppressionReason));
+            cachedSuppressionReason = playbackSuppressionReason;
             if (listener != null) listener.onStateChanged(Player.STATE_READY);
         }
 
         @Override
         public void onMediaItemTransition(MediaItem mediaItem, int reason) {
             Log.i(TAG, String.format("onMediaItemTransition: %s %d", mediaItem, reason));
+            updateCachedState();
             if (listener != null) listener.onTrackChanged(reason);
         }
 
         @Override
         public void onPositionDiscontinuity(@NonNull Player.PositionInfo oldPosition, @NonNull Player.PositionInfo newPosition, int reason) {
             Log.i(TAG, String.format("onPositionDiscontinuity: %d", reason));
+            updateCachedState();
         }
 
         @Override
@@ -88,21 +112,43 @@ public class LocalPlayer implements Playback {
         }
     };
 
+    private void updateCachedState() {
+        cachedProgress = (int) exoPlayer.getCurrentPosition();
+        cachedDuration = (int) exoPlayer.getDuration();
+        cachedPlayWhenReady = exoPlayer.getPlayWhenReady();
+        cachedSuppressionReason = exoPlayer.getPlaybackSuppressionReason();
+        cachedVolume = (int) (exoPlayer.getVolume() * 100);
+    }
+
     public LocalPlayer(Context context) {
         this.context = context;
 
+        replayGainProcessor = new ReplayGainAudioProcessor();
+
+        DefaultRenderersFactory renderersFactory = new DefaultRenderersFactory(context) {
+            @Override
+            protected AudioSink buildAudioSink(Context context,
+                    boolean enableFloatOutput, boolean enableAudioTrackPlaybackParams) {
+                return new DefaultAudioSink.Builder(context)
+                    .setAudioProcessors(new AudioProcessor[]{replayGainProcessor})
+                    .setEnableFloatOutput(enableFloatOutput)
+                    .setEnableAudioTrackPlaybackParams(enableAudioTrackPlaybackParams)
+                    .build();
+            }
+        };
+
         AudioAttributes audioAttributes = new AudioAttributes.Builder()
             .setUsage(C.USAGE_MEDIA)
-            .setContentType(C.CONTENT_TYPE_MUSIC)
+            .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
             .build();
 
         exoPlayer = new ExoPlayer.Builder(context)
+            .setRenderersFactory(renderersFactory)
             .setMediaSourceFactory(new DefaultMediaSourceFactory(buildDataSourceFactory()))
             .setAudioAttributes(audioAttributes, true)
             .build();
 
         exoPlayer.addListener(eventListener);
-        exoPlayer.setThrowsWhenUsingWrongThread(false);
         exoPlayer.prepare();
 
         long cacheSize = PreferenceUtil.getInstance(context).getMediaCacheSize();
@@ -113,29 +159,34 @@ public class LocalPlayer implements Playback {
         simpleCache = new SimpleCache(cacheDirectory, recentlyUsedCache, databaseProvider);
     }
 
+    public ReplayGainAudioProcessor getReplayGainProcessor() {
+        return replayGainProcessor;
+    }
+
     @Override
     public void setQueue(List<Song> queue, int position, int progress, boolean resetCurrentSong) {
         executorService.submit(() -> {
             List<MediaItem> mediaItems = createMediaItems(queue);
 
-            // TODO: Call this on main thread
-            if (resetCurrentSong) {
-                exoPlayer.setMediaItems(mediaItems, position, progress);
-                return;
-            }
+            mainHandler.post(() -> {
+                if (resetCurrentSong) {
+                    exoPlayer.setMediaItems(mediaItems, position, progress);
+                    return;
+                }
 
-            int currentPosition = exoPlayer.getCurrentMediaItemIndex();
-            exoPlayer.removeMediaItems(0, currentPosition);
+                int currentPosition = exoPlayer.getCurrentMediaItemIndex();
+                exoPlayer.removeMediaItems(0, currentPosition);
 
-            if (exoPlayer.getMediaItemCount() > 1) {
-                exoPlayer.removeMediaItems(1, exoPlayer.getMediaItemCount());
-            }
+                if (exoPlayer.getMediaItemCount() > 1) {
+                    exoPlayer.removeMediaItems(1, exoPlayer.getMediaItemCount());
+                }
 
-            if (position + 1 < mediaItems.size()) {
-                exoPlayer.addMediaItems(1, mediaItems.subList(position + 1, mediaItems.size()));
-            }
+                if (position + 1 < mediaItems.size()) {
+                    exoPlayer.addMediaItems(1, mediaItems.subList(position + 1, mediaItems.size()));
+                }
 
-            exoPlayer.addMediaItems(0, mediaItems.subList(0, position));
+                exoPlayer.addMediaItems(0, mediaItems.subList(0, position));
+            });
         });
     }
 
@@ -177,9 +228,11 @@ public class LocalPlayer implements Playback {
 
     @Override
     public void playSongAt(int position) {
-        if (exoPlayer.getMediaItemCount() > 0) {
-            exoPlayer.seekTo(Math.max(0, position) % exoPlayer.getMediaItemCount(), 0);
-        }
+        mainHandler.post(() -> {
+            if (exoPlayer.getMediaItemCount() > 0) {
+                exoPlayer.seekTo(Math.max(0, position) % exoPlayer.getMediaItemCount(), 0);
+            }
+        });
     }
 
     private DataSource.Factory buildDataSourceFactory() {
@@ -198,21 +251,36 @@ public class LocalPlayer implements Playback {
         this.listener = listener;
     }
 
+    private boolean isOnMainThread() {
+        return Looper.myLooper() == Looper.getMainLooper();
+    }
+
     @Override
     public boolean isReady() {
-        return exoPlayer.getPlayWhenReady();
+        if (isOnMainThread()) {
+            cachedPlayWhenReady = exoPlayer.getPlayWhenReady();
+        }
+        return cachedPlayWhenReady;
     }
 
     @Override
     public boolean isPlaying() {
-        return exoPlayer.getPlayWhenReady() && exoPlayer.getPlaybackSuppressionReason() == Player.PLAYBACK_SUPPRESSION_REASON_NONE;
+        if (isOnMainThread()) {
+            cachedPlayWhenReady = exoPlayer.getPlayWhenReady();
+            cachedSuppressionReason = exoPlayer.getPlaybackSuppressionReason();
+        }
+        return cachedPlayWhenReady && cachedSuppressionReason == Player.PLAYBACK_SUPPRESSION_REASON_NONE;
     }
 
     @Override
-    @SuppressWarnings("ConstantConditions")
     public boolean isLoading() {
+        if (!isOnMainThread()) {
+            return false;
+        }
+
         MediaItem current = exoPlayer.getCurrentMediaItem();
-        if (current != null && current.localConfiguration.uri.toString().contains("file://")) {
+        if (current != null && current.localConfiguration != null
+                && current.localConfiguration.uri.toString().contains("file://")) {
             return false;
         }
 
@@ -221,57 +289,71 @@ public class LocalPlayer implements Playback {
 
     @Override
     public void start() {
-        exoPlayer.setPlayWhenReady(true);
+        mainHandler.post(() -> exoPlayer.setPlayWhenReady(true));
     }
 
     @Override
     public void pause() {
-        exoPlayer.setPlayWhenReady(false);
+        mainHandler.post(() -> exoPlayer.setPlayWhenReady(false));
     }
 
     @Override
     public void stop() {
+        executorService.shutdownNow();
+        mainHandler.removeCallbacksAndMessages(null);
         simpleCache.release();
         exoPlayer.release();
     }
 
     @Override
     public void previous() {
-        exoPlayer.seekToPreviousMediaItem();
+        mainHandler.post(() -> exoPlayer.seekToPreviousMediaItem());
     }
 
     @Override
     public void next() {
-        exoPlayer.seekToNextMediaItem();
+        mainHandler.post(() -> exoPlayer.seekToNextMediaItem());
     }
 
     @Override
     public void setRepeatMode(@Player.RepeatMode int repeatMode) {
-        exoPlayer.setRepeatMode(repeatMode);
+        mainHandler.post(() -> exoPlayer.setRepeatMode(repeatMode));
     }
 
     @Override
     public int getProgress() {
-        return (int) exoPlayer.getCurrentPosition();
+        if (isOnMainThread()) {
+            cachedProgress = (int) exoPlayer.getCurrentPosition();
+        }
+        return cachedProgress;
     }
 
     @Override
     public int getDuration() {
-        return (int) exoPlayer.getDuration();
+        if (isOnMainThread()) {
+            cachedDuration = (int) exoPlayer.getDuration();
+        }
+        return cachedDuration;
     }
 
     @Override
     public void setProgress(int progress) {
-        exoPlayer.seekTo(progress);
+        mainHandler.post(() -> exoPlayer.seekTo(progress));
     }
 
     @Override
     public void setVolume(int volume) {
-        exoPlayer.setVolume(volume / 100f);
+        mainHandler.post(() -> {
+            exoPlayer.setVolume(volume / 100f);
+            cachedVolume = volume;
+        });
     }
 
     @Override
     public int getVolume() {
-        return (int) (exoPlayer.getVolume() * 100);
+        if (isOnMainThread()) {
+            cachedVolume = (int) (exoPlayer.getVolume() * 100);
+        }
+        return cachedVolume;
     }
 }

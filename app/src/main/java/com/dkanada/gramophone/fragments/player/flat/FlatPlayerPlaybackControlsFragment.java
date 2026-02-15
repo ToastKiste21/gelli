@@ -68,6 +68,7 @@ public class FlatPlayerPlaybackControlsFragment extends AbsMusicServiceFragment 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        binding = null;
     }
 
     @Override

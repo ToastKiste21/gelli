@@ -16,9 +16,13 @@ public class NetworkReceiver extends BroadcastReceiver {
 
         // network info will be null in airplane mode
         if (networkInfo != null && networkInfo.isConnected()) {
-            context.sendBroadcast(new Intent(LoginService.STATE_ONLINE));
+            Intent onlineIntent = new Intent(LoginService.STATE_ONLINE);
+            onlineIntent.setPackage(context.getPackageName());
+            context.sendBroadcast(onlineIntent);
         } else {
-            context.sendBroadcast(new Intent(LoginService.STATE_OFFLINE));
+            Intent offlineIntent = new Intent(LoginService.STATE_OFFLINE);
+            offlineIntent.setPackage(context.getPackageName());
+            context.sendBroadcast(offlineIntent);
         }
     }
 }

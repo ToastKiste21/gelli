@@ -29,6 +29,9 @@ public abstract class AbsLibraryPagerRecyclerViewFragment<A extends RecyclerView
     public int size;
     public boolean loading;
 
+    private int cachedPageSize = -1;
+    private int lastOffset = Integer.MIN_VALUE;
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         setHasOptionsMenu(true);
@@ -75,6 +78,8 @@ public abstract class AbsLibraryPagerRecyclerViewFragment<A extends RecyclerView
 
         binding.recyclerView.setLayoutManager(layoutManager);
         binding.recyclerView.setAdapter(adapter);
+        binding.recyclerView.setHasFixedSize(true);
+        binding.recyclerView.setItemAnimator(null);
     }
 
     protected void invalidateAdapter() {
@@ -124,20 +129,26 @@ public abstract class AbsLibraryPagerRecyclerViewFragment<A extends RecyclerView
 
     @Override
     public void onOffsetChanged(AppBarLayout appBarLayout, int i) {
+        if (i == lastOffset) return;
+        lastOffset = i;
+
         binding.container.setPadding(binding.container.getPaddingLeft(), binding.container.getPaddingTop(), binding.container.getPaddingRight(), getLibraryFragment().getTotalAppBarScrollingRange() + i);
 
+        if (loading) return;
+
         int last = 0;
-        if (!loading && getLayoutManager() instanceof GridLayoutManager) {
-            GridLayoutManager layoutManager = (GridLayoutManager) getLayoutManager();
-            last = layoutManager.findLastVisibleItemPosition();
-        } else if (!loading && getLayoutManager() instanceof LinearLayoutManager) {
-            LinearLayoutManager layoutManager = (LinearLayoutManager) getLayoutManager();
-            last = layoutManager.findLastVisibleItemPosition();
+        if (getLayoutManager() instanceof GridLayoutManager) {
+            last = ((GridLayoutManager) getLayoutManager()).findLastVisibleItemPosition();
+        } else if (getLayoutManager() instanceof LinearLayoutManager) {
+            last = ((LinearLayoutManager) getLayoutManager()).findLastVisibleItemPosition();
         }
 
-        int page = PreferenceUtil.getInstance(App.getInstance()).getPageSize();
+        if (cachedPageSize < 0) {
+            cachedPageSize = PreferenceUtil.getInstance(App.getInstance()).getPageSize();
+        }
+
         int total = getAdapter().getItemCount();
-        if (last > total - page / 2 && total < size) {
+        if (last > total - cachedPageSize / 2 && total < size) {
             query = createQuery();
             loading = true;
 
@@ -148,8 +159,8 @@ public abstract class AbsLibraryPagerRecyclerViewFragment<A extends RecyclerView
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-
         getLibraryFragment().removeOnAppBarOffsetChangedListener(this);
+        binding = null;
     }
 
     private void checkIsEmpty() {

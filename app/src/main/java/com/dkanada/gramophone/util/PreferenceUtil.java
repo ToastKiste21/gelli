@@ -82,6 +82,9 @@ public final class PreferenceUtil {
     public static final String REMEMBER_SHUFFLE = "remember_shuffle";
     public static final String REMEMBER_QUEUE = "remember_queue";
     public static final String GAIN_OFFSET = "gain_offset";
+    public static final String REPLAY_GAIN_ENABLED = "replay_gain_enabled";
+    public static final String REPLAY_GAIN_PREAMP = "replay_gain_preamp";
+    public static final String REPLAY_GAIN_PREAMP_NO_TAG = "replay_gain_preamp_no_tag";
 
     public static final String LOCATION_DOWNLOAD = "location_download";
     public static final String LOCATION_CACHE = "location_cache";
@@ -117,6 +120,16 @@ public final class PreferenceUtil {
         Migration2
     );
 
+    // Migrate download location from cacheDir to filesDir (run after constructor)
+    private void migrateDownloadLocation() {
+        String cacheDir = mContext.getCacheDir().toString();
+        String current = mPreferences.getString(LOCATION_DOWNLOAD, null);
+
+        if (current != null && current.equals(cacheDir)) {
+            mPreferences.edit().putString(LOCATION_DOWNLOAD, mContext.getFilesDir().toString()).commit();
+        }
+    }
+
     private static PreferenceUtil instance;
 
     private final SharedPreferences mPreferences;
@@ -132,6 +145,8 @@ public final class PreferenceUtil {
                 mPreferences.edit().putInt(VERSION, migration.endVersion).commit();
             }
         }
+
+        migrateDownloadLocation();
     }
 
     public static PreferenceUtil getInstance(final Context context) {
@@ -257,6 +272,18 @@ public final class PreferenceUtil {
 
     public final int getGainOffset() {
         return mPreferences.getInt(GAIN_OFFSET, 100);
+    }
+
+    public boolean getReplayGainEnabled() {
+        return mPreferences.getBoolean(REPLAY_GAIN_ENABLED, false);
+    }
+
+    public float getReplayGainPreAmp() {
+        return mPreferences.getInt(REPLAY_GAIN_PREAMP, 10) - 10f;
+    }
+
+    public float getReplayGainPreAmpNoTag() {
+        return mPreferences.getInt(REPLAY_GAIN_PREAMP_NO_TAG, 10) - 10f;
     }
 
     public final boolean getShowAlbumCover() {
@@ -420,7 +447,7 @@ public final class PreferenceUtil {
     }
 
     public final String getLocationDownload() {
-        return mPreferences.getString(LOCATION_DOWNLOAD, mContext.getCacheDir().toString());
+        return mPreferences.getString(LOCATION_DOWNLOAD, mContext.getFilesDir().toString());
     }
 
     public final String getLocationCache() {

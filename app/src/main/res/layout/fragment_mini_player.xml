@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="@dimen/mini_player_height"
-    android:background="?cardBackgroundColor"
+    android:background="@drawable/bg_mini_player"
+    android:elevation="8dp"
     android:clickable="true"
     android:focusable="true"
     android:transitionName="@string/transition_mini_player"
@@ -34,7 +35,7 @@
             android:layout_weight="1"
             android:gravity="center_vertical"
             android:singleLine="true"
-            android:textAppearance="@style/TextAppearance.AppCompat.Subhead" />
+            android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
 
         <com.dkanada.gramophone.views.IconImageView
             android:id="@+id/mini_player_play_pause_button"

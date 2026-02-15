@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.Phonograph.Base" parent="Theme.AppCompat.NoActionBar">
+    <style name="Theme.Phonograph.Base" parent="Theme.Material3.Dark.NoActionBar">
 
         <item name="android:windowActionBarOverlay">true</item>
         <item name="windowActionBarOverlay">true</item>
@@ -10,18 +10,22 @@
         <item name="rectSelector">@drawable/rect_selector_dark</item>
         <item name="rectSelectorStrong">@drawable/rect_selector_strong_dark</item>
 
-        <item name="cardBackgroundColor">#424242</item>
+        <item name="cardBackgroundColor">#2B2B2B</item>
 
-        <item name="defaultFooterColor">#212121</item>
+        <item name="defaultFooterColor">#1E1E1E</item>
 
-        <item name="dividerColor">#10FFFFFF</item>
+        <item name="dividerColor">#14FFFFFF</item>
         <item name="iconColor">#B3FFFFFF</item>
 
-        <item name="toolbarPopupTheme">@style/ThemeOverlay.AppCompat</item>
+        <item name="toolbarPopupTheme">@style/ThemeOverlay.Material3.Dark</item>
 
         <!-- TextInputLayout uses colorPrimary for the cursor line and bubble -->
         <item name="colorAccent">@android:color/white</item>
         <item name="colorPrimary">@android:color/white</item>
+
+        <!-- M3 surface colors for modern appearance -->
+        <item name="colorSurface">#1C1B1F</item>
+        <item name="colorSurfaceVariant">#49454F</item>
 
         <!-- necessary to find the overflow button later in the layout -->
         <item name="android:actionOverflowButtonStyle">@style/Widget.ActionButton.Overflow</item>
@@ -30,7 +34,7 @@
 
     </style>
 
-    <style name="Theme.Phonograph.Base.Light" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="Theme.Phonograph.Base.Light" parent="Theme.Material3.Light.NoActionBar">
 
         <item name="android:windowActionBarOverlay">true</item>
         <item name="windowActionBarOverlay">true</item>
@@ -41,16 +45,20 @@
 
         <item name="cardBackgroundColor">#FFFFFF</item>
 
-        <item name="defaultFooterColor">#E0E0E0</item>
+        <item name="defaultFooterColor">#F2F2F2</item>
 
-        <item name="dividerColor">#10000000</item>
+        <item name="dividerColor">#14000000</item>
         <item name="iconColor">#8A000000</item>
 
-        <item name="toolbarPopupTheme">@style/ThemeOverlay.AppCompat.Light</item>
+        <item name="toolbarPopupTheme">@style/ThemeOverlay.Material3.Light</item>
 
         <!-- TextInputLayout uses colorPrimary for the cursor line and bubble -->
         <item name="colorAccent">@android:color/black</item>
         <item name="colorPrimary">@android:color/black</item>
+
+        <!-- M3 surface colors -->
+        <item name="colorSurface">#FFFBFE</item>
+        <item name="colorSurfaceVariant">#E7E0EC</item>
 
         <!-- necessary to find the overflow button later in the layout -->
         <item name="android:actionOverflowButtonStyle">@style/Widget.ActionButton.Overflow</item>
@@ -63,8 +71,11 @@
         <item name="android:windowBackground">@android:color/black</item>
 
         <item name="dividerColor">#18FFFFFF</item>
-        <item name="defaultFooterColor">#424242</item>
-        <item name="cardBackgroundColor">#212121</item>
+        <item name="defaultFooterColor">#1A1A1A</item>
+        <item name="cardBackgroundColor">#121212</item>
+
+        <item name="colorSurface">#000000</item>
+        <item name="colorSurfaceVariant">#2B2B2B</item>
     </style>
 
     <style name="FabParent">

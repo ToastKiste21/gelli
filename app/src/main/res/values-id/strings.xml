@@ -138,4 +138,12 @@
     <string name="sort_method_album">Album</string>
     <string name="sort_method_year">Tahun</string>
     <string name="finish_current_music_sleep_timer">Selesaikan lagu terakhir</string>
+    <string name="pref_title_gain_adjustment">Penyesuaian gain</string>
+    <string name="pref_summary_gain_adjustment">Sesuaikan gain keluaran pemutar</string>
+    <string name="pref_title_replay_gain">ReplayGain</string>
+    <string name="pref_summary_replay_gain">Normalkan volume menggunakan data gain yang dianalisis server</string>
+    <string name="pref_title_replay_gain_preamp">Pre-amp (dengan tag)</string>
+    <string name="pref_summary_replay_gain_preamp">Sesuaikan volume saat tag gain ada (-10 hingga +10 dB)</string>
+    <string name="pref_title_replay_gain_preamp_no_tag">Pre-amp (tanpa tag)</string>
+    <string name="pref_summary_replay_gain_preamp_no_tag">Sesuaikan volume saat tag gain tidak ada (-10 hingga +10 dB)</string>
 </resources>

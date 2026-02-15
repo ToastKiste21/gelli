@@ -28,7 +28,9 @@ public class LoginService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        sendBroadcast(new Intent(STATE_POLLING));
+        Intent pollingIntent = new Intent(STATE_POLLING);
+        pollingIntent.setPackage(getPackageName());
+        sendBroadcast(pollingIntent);
         authenticate();
 
         return super.onStartCommand(intent, flags, startId);
@@ -61,12 +63,16 @@ public class LoginService extends Service {
                 App.getApiClient().ensureWebSocket();
                 App.getApiClient().ReportCapabilities(clientCapabilities, new EmptyResponse());
 
-                sendBroadcast(new Intent(STATE_ONLINE));
+                Intent onlineIntent = new Intent(STATE_ONLINE);
+                onlineIntent.setPackage(getPackageName());
+                sendBroadcast(onlineIntent);
             }
 
             @Override
             public void onError(Exception exception) {
-                sendBroadcast(new Intent(STATE_OFFLINE));
+                Intent offlineIntent = new Intent(STATE_OFFLINE);
+                offlineIntent.setPackage(getPackageName());
+                sendBroadcast(offlineIntent);
             }
         });
     }

@@ -123,4 +123,12 @@
     <string name="pref_title_categories">Категорії бібліотеки</string>
     <string name="pref_summary_categories">Налаштувати видимість та порядок категорій бібліотеки.</string>
     <string name="you_have_to_select_at_least_one_category">Виберіть принаймні одну категорію.</string>
+    <string name="pref_title_gain_adjustment">Регулювання підсилення</string>
+    <string name="pref_summary_gain_adjustment">Налаштування підсилення виходу програвача</string>
+    <string name="pref_title_replay_gain">ReplayGain</string>
+    <string name="pref_summary_replay_gain">Нормалізація гучності за допомогою даних підсилення, проаналізованих сервером</string>
+    <string name="pref_title_replay_gain_preamp">Передпідсилювач (з тегами)</string>
+    <string name="pref_summary_replay_gain_preamp">Регулювання гучності за наявності тегів підсилення (від -10 до +10 дБ)</string>
+    <string name="pref_title_replay_gain_preamp_no_tag">Передпідсилювач (без тегів)</string>
+    <string name="pref_summary_replay_gain_preamp_no_tag">Регулювання гучності за відсутності тегів підсилення (від -10 до +10 дБ)</string>
 </resources>

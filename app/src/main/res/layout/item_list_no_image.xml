@@ -40,15 +40,14 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif"
                 android:singleLine="true"
-                android:textAppearance="@style/TextAppearance.AppCompat.Subhead" />
+                android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
 
             <TextView
                 android:id="@+id/text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="sans-serif"
                 android:singleLine="true"
-                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
                 android:textColor="?android:textColorSecondary" />
 
         </LinearLayout>

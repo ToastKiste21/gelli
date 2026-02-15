@@ -36,19 +36,16 @@
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif-medium"
             android:singleLine="true"
-            android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
-            android:textColor="@color/overlay_text"
-            android:textSize="14sp" />
+            android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
+            android:textColor="@color/overlay_text" />
 
         <TextView
             android:id="@+id/text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="sans-serif"
             android:singleLine="true"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-            android:textColor="@color/overlay_text"
-            android:textSize="14sp" />
+            android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+            android:textColor="@color/overlay_text" />
 
     </LinearLayout>
 

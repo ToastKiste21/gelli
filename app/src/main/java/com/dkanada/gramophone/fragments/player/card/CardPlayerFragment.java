@@ -217,6 +217,18 @@ public class CardPlayerFragment extends AbsPlayerFragment implements PlayerAlbum
 
         recyclerViewDragDropManager.attachRecyclerView(binding.playerRecyclerView);
 
+        playingQueueAdapter.setOnDragStateChangedListener(new PlayingQueueAdapter.OnDragStateChangedListener() {
+            @Override
+            public void onDragStarted() {
+                binding.playerSlidingLayout.setTouchEnabled(false);
+            }
+
+            @Override
+            public void onDragFinished() {
+                binding.playerSlidingLayout.setTouchEnabled(true);
+            }
+        });
+
         layoutManager.scrollToPositionWithOffset(MusicPlayerRemote.getPosition() + 1, 0);
     }
 

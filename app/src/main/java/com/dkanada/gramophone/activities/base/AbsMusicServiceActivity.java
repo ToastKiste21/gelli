@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.view.View;
@@ -21,7 +22,6 @@ import com.dkanada.gramophone.util.PreferenceUtil;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public abstract class AbsMusicServiceActivity extends AbsBaseActivity implements MusicServiceEventListener {
@@ -83,7 +83,11 @@ public abstract class AbsMusicServiceActivity extends AbsBaseActivity implements
             filter.addAction(MusicService.META_CHANGED);
             filter.addAction(MusicService.QUEUE_CHANGED);
 
-            registerReceiver(musicStateReceiver, filter);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                registerReceiver(musicStateReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
+            } else {
+                registerReceiver(musicStateReceiver, filter);
+            }
 
             receiverRegistered = true;
         }
@@ -194,18 +198,34 @@ public abstract class AbsMusicServiceActivity extends AbsBaseActivity implements
 
     @Override
     protected String getPermissionMessage() {
+        if (Build.VERSION.SDK_INT >= 33) {
+            return getString(R.string.permission_notifications_denied);
+        }
         return getString(R.string.permission_external_storage_denied);
     }
 
     @Override
     protected List<String> getPermissionRequest() {
+        List<String> permissions = new ArrayList<>();
         Context context = getApplicationContext();
-        String downloadLocation = PreferenceUtil.getInstance(context).getLocationDownload();
 
-        if (downloadLocation.equals(context.getCacheDir().toString())) {
-            return new ArrayList<>();
+        // Android 13+ requires POST_NOTIFICATIONS for all notifications
+        if (Build.VERSION.SDK_INT >= 33) {
+            permissions.add("android.permission.POST_NOTIFICATIONS");
         }
 
-        return Arrays.asList(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        // Storage permissions only needed for external download locations on Android < 13
+        // On Android 13+ storage permissions have no effect
+        if (Build.VERSION.SDK_INT < 33) {
+            String downloadLocation = PreferenceUtil.getInstance(context).getLocationDownload();
+            String internalPath = context.getApplicationInfo().dataDir;
+
+            if (!downloadLocation.startsWith(internalPath)) {
+                permissions.add(Manifest.permission.READ_EXTERNAL_STORAGE);
+                permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            }
+        }
+
+        return permissions;
     }
 }

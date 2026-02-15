@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -39,7 +40,11 @@ public abstract class AbsMusicContentActivity extends AbsMusicPanelActivity impl
         filter.addAction(LoginService.STATE_ONLINE);
         filter.addAction(LoginService.STATE_OFFLINE);
 
-        registerReceiver(receiver, filter);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED);
+        } else {
+            registerReceiver(receiver, filter);
+        }
 
         if (App.getApiClient() == null) {
             startService(new Intent(this, LoginService.class));

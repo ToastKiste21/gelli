@@ -138,4 +138,12 @@
     <string name="sort_method_album">Альбом</string>
     <string name="sort_method_year">Год</string>
     <string name="finish_current_music_sleep_timer">Последняя песня завершилась</string>
+    <string name="pref_title_gain_adjustment">Регулировка усиления</string>
+    <string name="pref_summary_gain_adjustment">Настройка усиления выхода проигрывателя</string>
+    <string name="pref_title_replay_gain">ReplayGain</string>
+    <string name="pref_summary_replay_gain">Нормализация громкости с использованием данных усиления, проанализированных сервером</string>
+    <string name="pref_title_replay_gain_preamp">Предусилитель (с тегами)</string>
+    <string name="pref_summary_replay_gain_preamp">Регулировка громкости при наличии тегов усиления (от -10 до +10 дБ)</string>
+    <string name="pref_title_replay_gain_preamp_no_tag">Предусилитель (без тегов)</string>
+    <string name="pref_summary_replay_gain_preamp_no_tag">Регулировка громкости при отсутствии тегов усиления (от -10 до +10 дБ)</string>
 </resources>

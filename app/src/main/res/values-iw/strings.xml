@@ -134,4 +134,12 @@
     <string name="sort_method_artist">אמן</string>
     <string name="sort_method_album">אלבום</string>
     <string name="sort_method_year">שנה</string>
+    <string name="pref_title_gain_adjustment">כוונון הגברה</string>
+    <string name="pref_summary_gain_adjustment">כוונן את ההגברה של פלט הנגן</string>
+    <string name="pref_title_replay_gain">ReplayGain</string>
+    <string name="pref_summary_replay_gain">נרמל עוצמת שמע באמצעות נתוני הגברה שנותחו בשרת</string>
+    <string name="pref_title_replay_gain_preamp">מגבר קדם (עם תגיות)</string>
+    <string name="pref_summary_replay_gain_preamp">כוונן עוצמת שמע כאשר תגיות הגברה קיימות (-10 עד +10 דציבל)</string>
+    <string name="pref_title_replay_gain_preamp_no_tag">מגבר קדם (ללא תגיות)</string>
+    <string name="pref_summary_replay_gain_preamp_no_tag">כוונן עוצמת שמע כאשר תגיות הגברה חסרות (-10 עד +10 דציבל)</string>
 </resources>

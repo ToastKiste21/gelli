@@ -58,6 +58,7 @@ public class CardPlayerPlaybackControlsFragment extends AbsMusicServiceFragment 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        binding = null;
     }
 
     @Override

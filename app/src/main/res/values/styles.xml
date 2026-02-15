@@ -31,14 +31,30 @@
         <item name="titleMarginStart">16dp</item>
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">?android:attr/actionBarSize</item>
-        <item name="android:theme">@style/ThemeOverlay.AppCompat.Dark.ActionBar</item>
+        <item name="android:theme">@style/ThemeOverlay.Material3.Dark.ActionBar</item>
         <item name="android:popupTheme" tools:ignore="NewApi">?toolbarPopupTheme</item>
         <item name="android:elevation" tools:ignore="NewApi">@dimen/toolbar_elevation</item>
         <item name="android:transitionName" tools:ignore="NewApi">toolbar</item>
     </style>
 
-    <style name="LoginScreen" parent="Theme.MaterialComponents.Light.DarkActionBar">
+    <style name="LoginScreen" parent="Theme.Material3.Light">
         <item name="android:windowAnimationStyle">@null</item>
+    </style>
+
+    <!-- Shape appearance overlays for rounded album art -->
+    <style name="ShapeAppearance.App.RoundedAlbumArt.Grid" parent="">
+        <item name="cornerSize">12dp</item>
+        <item name="cornerFamily">rounded</item>
+    </style>
+
+    <style name="ShapeAppearance.App.RoundedAlbumArt.List" parent="">
+        <item name="cornerSize">8dp</item>
+        <item name="cornerFamily">rounded</item>
+    </style>
+
+    <style name="ShapeAppearance.App.RoundedAlbumArt.Detail" parent="">
+        <item name="cornerSize">16dp</item>
+        <item name="cornerFamily">rounded</item>
     </style>
 
 </resources>

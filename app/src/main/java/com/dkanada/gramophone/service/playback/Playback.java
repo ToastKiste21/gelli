@@ -1,7 +1,7 @@
 package com.dkanada.gramophone.service.playback;
 
 import com.dkanada.gramophone.model.Song;
-import com.google.android.exoplayer2.Player;
+import androidx.media3.common.Player;
 
 import java.util.List;
 

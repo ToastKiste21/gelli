@@ -134,4 +134,12 @@
     <string name="sort_method_artist">Interpret</string>
     <string name="sort_method_album">Album</string>
     <string name="sort_method_year">Rok</string>
+    <string name="pref_title_gain_adjustment">Úprava zesílení</string>
+    <string name="pref_summary_gain_adjustment">Upravit zesílení výstupu přehrávače</string>
+    <string name="pref_title_replay_gain">ReplayGain</string>
+    <string name="pref_summary_replay_gain">Normalizovat hlasitost pomocí dat o zesílení analyzovaných serverem</string>
+    <string name="pref_title_replay_gain_preamp">Předzesilovač (se štítky)</string>
+    <string name="pref_summary_replay_gain_preamp">Upravit hlasitost, když jsou přítomny štítky zesílení (-10 až +10 dB)</string>
+    <string name="pref_title_replay_gain_preamp_no_tag">Předzesilovač (bez štítků)</string>
+    <string name="pref_summary_replay_gain_preamp_no_tag">Upravit hlasitost, když štítky zesílení chybí (-10 až +10 dB)</string>
 </resources>

@@ -118,4 +118,12 @@
     <string name="playing_notification_description">Thông báo đang phát cung cấp các hành động để phát / tạm dừng vv.</string>
     <string name="playing_notification_name">Thông báo đang phát</string>
     <string name="eugene_cheung_summary">Đối với đóng góp cho mã nguồn.</string>
+    <string name="pref_title_gain_adjustment">Điều chỉnh khuếch đại</string>
+    <string name="pref_summary_gain_adjustment">Điều chỉnh khuếch đại đầu ra của trình phát</string>
+    <string name="pref_title_replay_gain">ReplayGain</string>
+    <string name="pref_summary_replay_gain">Chuẩn hóa âm lượng bằng dữ liệu khuếch đại được máy chủ phân tích</string>
+    <string name="pref_title_replay_gain_preamp">Tiền khuếch đại (có thẻ)</string>
+    <string name="pref_summary_replay_gain_preamp">Điều chỉnh âm lượng khi có thẻ khuếch đại (-10 đến +10 dB)</string>
+    <string name="pref_title_replay_gain_preamp_no_tag">Tiền khuếch đại (không có thẻ)</string>
+    <string name="pref_summary_replay_gain_preamp_no_tag">Điều chỉnh âm lượng khi không có thẻ khuếch đại (-10 đến +10 dB)</string>
 </resources>

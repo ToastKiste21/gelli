@@ -134,4 +134,12 @@
     <string name="sort_method_artist">الفنان</string>
     <string name="sort_method_album">الألبوم</string>
     <string name="sort_method_year">السنة</string>
+    <string name="pref_title_gain_adjustment">ضبط الكسب</string>
+    <string name="pref_summary_gain_adjustment">ضبط كسب مخرج المشغّل</string>
+    <string name="pref_title_replay_gain">ReplayGain</string>
+    <string name="pref_summary_replay_gain">تطبيع مستوى الصوت باستخدام بيانات الكسب المحللة من الخادم</string>
+    <string name="pref_title_replay_gain_preamp">مضخم أولي (مع وسوم)</string>
+    <string name="pref_summary_replay_gain_preamp">ضبط مستوى الصوت عند وجود وسوم الكسب (-10 إلى +10 ديسيبل)</string>
+    <string name="pref_title_replay_gain_preamp_no_tag">مضخم أولي (بدون وسوم)</string>
+    <string name="pref_summary_replay_gain_preamp_no_tag">ضبط مستوى الصوت عند عدم وجود وسوم الكسب (-10 إلى +10 ديسيبل)</string>
 </resources>

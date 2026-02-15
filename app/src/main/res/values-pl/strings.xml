@@ -134,4 +134,12 @@
     <string name="sort_method_artist">Artysta</string>
     <string name="sort_method_album">Album</string>
     <string name="sort_method_year">Rok</string>
+    <string name="pref_title_gain_adjustment">Regulacja wzmocnienia</string>
+    <string name="pref_summary_gain_adjustment">Dostosuj wzmocnienie wyjścia odtwarzacza</string>
+    <string name="pref_title_replay_gain">ReplayGain</string>
+    <string name="pref_summary_replay_gain">Normalizuj głośność na podstawie danych wzmocnienia przeanalizowanych przez serwer</string>
+    <string name="pref_title_replay_gain_preamp">Przedwzmacniacz (z tagami)</string>
+    <string name="pref_summary_replay_gain_preamp">Dostosuj głośność gdy tagi wzmocnienia są obecne (od -10 do +10 dB)</string>
+    <string name="pref_title_replay_gain_preamp_no_tag">Przedwzmacniacz (bez tagów)</string>
+    <string name="pref_summary_replay_gain_preamp_no_tag">Dostosuj głośność gdy tagi wzmocnienia są nieobecne (od -10 do +10 dB)</string>
 </resources>

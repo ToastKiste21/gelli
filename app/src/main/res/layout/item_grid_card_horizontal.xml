@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:layout_margin="16dp"
     android:foreground="?attr/rectSelectorStrong"
-    app:cardCornerRadius="0dp"
+    app:cardCornerRadius="12dp"
     app:cardBackgroundColor="?cardBackgroundColor">
 
     <LinearLayout
@@ -40,7 +40,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:singleLine="true"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
                     android:textSize="14sp" />
 
                 <TextView
@@ -48,7 +48,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:singleLine="true"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+                    android:textAppearance="@style/TextAppearance.Material3.BodySmall"
                     android:textSize="12sp" />
 
             </LinearLayout>

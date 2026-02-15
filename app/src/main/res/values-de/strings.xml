@@ -165,4 +165,12 @@
     <string name="error_version">Bitte update den Server auf die aktuellste Version.</string>
     <string name="error_share_file">Die Datei konnte nicht geteilt werden.</string>
     <string name="pref_title_transcode_codec">Transkodierungs-Codec</string>
+    <string name="pref_title_gain_adjustment">Lautstärkeanpassung</string>
+    <string name="pref_summary_gain_adjustment">Verstärkung der Musikplayer-Ausgabe anpassen</string>
+    <string name="pref_title_replay_gain">ReplayGain</string>
+    <string name="pref_summary_replay_gain">Lautstärke mithilfe serverberechneter Gain-Daten normalisieren</string>
+    <string name="pref_title_replay_gain_preamp">Vorverstärker (mit Tags)</string>
+    <string name="pref_summary_replay_gain_preamp">Lautstärke anpassen, wenn Gain-Tags vorhanden sind (-10 bis +10 dB)</string>
+    <string name="pref_title_replay_gain_preamp_no_tag">Vorverstärker (ohne Tags)</string>
+    <string name="pref_summary_replay_gain_preamp_no_tag">Lautstärke anpassen, wenn keine Gain-Tags vorhanden sind (-10 bis +10 dB)</string>
 </resources>

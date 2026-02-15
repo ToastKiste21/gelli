@@ -9,6 +9,7 @@ import android.provider.Settings;
 import androidx.room.Room;
 
 import com.dkanada.gramophone.database.JellyDatabase;
+import com.google.android.material.color.DynamicColors;
 import com.dkanada.gramophone.helper.EventListener;
 import com.dkanada.gramophone.util.PreferenceUtil;
 import com.dkanada.gramophone.views.shortcuts.DynamicShortcutManager;
@@ -37,6 +38,7 @@ public class App extends Application {
         }
 
         app = this;
+        DynamicColors.applyToActivitiesIfAvailable(this);
         database = createDatabase(this);
         apiClient = createApiClient(this);
 

@@ -134,4 +134,12 @@
     <string name="sort_method_artist">Artist</string>
     <string name="sort_method_album">Album</string>
     <string name="sort_method_year">An</string>
+    <string name="pref_title_gain_adjustment">Ajustarea câștigului</string>
+    <string name="pref_summary_gain_adjustment">Ajustați câștigul ieșirii playerului</string>
+    <string name="pref_title_replay_gain">ReplayGain</string>
+    <string name="pref_summary_replay_gain">Normalizare volum folosind datele de câștig analizate de server</string>
+    <string name="pref_title_replay_gain_preamp">Preamplificator (cu etichete)</string>
+    <string name="pref_summary_replay_gain_preamp">Ajustați volumul când etichetele de câștig sunt prezente (-10 la +10 dB)</string>
+    <string name="pref_title_replay_gain_preamp_no_tag">Preamplificator (fără etichete)</string>
+    <string name="pref_summary_replay_gain_preamp_no_tag">Ajustați volumul când etichetele de câștig lipsesc (-10 la +10 dB)</string>
 </resources>

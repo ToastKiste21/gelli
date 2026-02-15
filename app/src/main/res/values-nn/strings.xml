@@ -43,4 +43,12 @@
     <string name="pref_summary_accent_color">Fokustemafarge, standard er rosa.</string>
     <string name="no_playlists">Ingen spelelister</string>
     <string name="song">Song</string>
+    <string name="pref_title_gain_adjustment">Forsterkingsjustering</string>
+    <string name="pref_summary_gain_adjustment">Juster forsterkinga til spelarens utgang</string>
+    <string name="pref_title_replay_gain">ReplayGain</string>
+    <string name="pref_summary_replay_gain">Normaliser volumet med serveranalyserte forsterkingsdata</string>
+    <string name="pref_title_replay_gain_preamp">Forforsterkar (med taggar)</string>
+    <string name="pref_summary_replay_gain_preamp">Juster volumet når forsterkingstaggar finst (-10 til +10 dB)</string>
+    <string name="pref_title_replay_gain_preamp_no_tag">Forforsterkar (utan taggar)</string>
+    <string name="pref_summary_replay_gain_preamp_no_tag">Juster volumet når forsterkingstaggar manglar (-10 til +10 dB)</string>
 </resources>

@@ -134,4 +134,12 @@
     <string name="sort_method_artist">아티스트</string>
     <string name="sort_method_album">앨범</string>
     <string name="sort_method_year">연도</string>
+    <string name="pref_title_gain_adjustment">게인 조정</string>
+    <string name="pref_summary_gain_adjustment">플레이어 출력 게인 조정</string>
+    <string name="pref_title_replay_gain">ReplayGain</string>
+    <string name="pref_summary_replay_gain">서버에서 분석한 게인 데이터를 사용하여 음량 정규화</string>
+    <string name="pref_title_replay_gain_preamp">프리앰프 (태그 있음)</string>
+    <string name="pref_summary_replay_gain_preamp">게인 태그가 있을 때 음량 조정 (-10 ~ +10 dB)</string>
+    <string name="pref_title_replay_gain_preamp_no_tag">프리앰프 (태그 없음)</string>
+    <string name="pref_summary_replay_gain_preamp_no_tag">게인 태그가 없을 때 음량 조정 (-10 ~ +10 dB)</string>
 </resources>

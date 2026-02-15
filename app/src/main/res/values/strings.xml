@@ -18,6 +18,14 @@
     <string name="action_remove_from_favorites">Remove from favorites</string>
     <string name="action_search">Search</string>
     <string name="action_download">Download</string>
+    <string name="action_remove_download">Remove download</string>
+    <string name="download_already_exists">Already downloaded.</string>
+    <string name="download_not_enough_space">Not enough storage space.</string>
+    <string name="download_failed">Download failed.</string>
+    <string name="download_removed">Download removed.</string>
+    <string name="download_location_internal">Internal storage</string>
+    <string name="download_location_external">External storage</string>
+    <string name="download_location_custom">Custom path…</string>
     <string name="action_cancel">Cancel</string>
     <string name="action_play_next">Play next</string>
     <string name="action_play">Play</string>
@@ -78,6 +86,9 @@
     <string name="added_title_to_queue">"Added 1 title to the queue."</string>
     <string name="added_x_titles_to_queue">Added %1$d titles to the queue.</string>
     <string name="downloading_x_songs">Downloading %1$d songs.</string>
+    <string name="download_progress">%1$d of %2$d</string>
+    <string name="download_complete_x_songs">%1$d songs downloaded.</string>
+    <string name="download_complete_with_errors">%1$d downloaded, %2$d failed.</string>
     <string name="delete_playlist_x"><![CDATA[Delete the playlist <b>%1$s</b>?]]></string>
     <string name="delete_x_playlists"><![CDATA[Delete <b>%1$d</b> playlists?]]></string>
     <string name="remove_song_x_from_playlist"><![CDATA[Remove the song <b>%1$s</b> from the playlist?]]></string>
@@ -129,6 +140,9 @@
     <string name="pref_title_image_cache_size">Images</string>
     <string name="pref_title_media_cache_size">Media</string>
     <string name="pref_title_gain_adjustment">Gain Adjustment</string>
+    <string name="pref_title_replay_gain">ReplayGain</string>
+    <string name="pref_title_replay_gain_preamp">Pre-amp (with tags)</string>
+    <string name="pref_title_replay_gain_preamp_no_tag">Pre-amp (without tags)</string>
 
     <string name="pref_summary_primary_color">The primary theme color for control elements.</string>
     <string name="pref_summary_accent_color">An alternate color used to accent elements.</string>
@@ -143,6 +157,9 @@
     <string name="pref_summary_categories">Configure visibility and order of display categories.</string>
     <string name="pref_summary_direct_play_codecs">Disable direct play codecs to force transcoding.</string>
     <string name="pref_summary_gain_adjustment">Adjust the gain of the music player\'s output</string>
+    <string name="pref_summary_replay_gain">Normalize volume using server-analyzed gain data</string>
+    <string name="pref_summary_replay_gain_preamp">Adjust volume when gain tags are present (-10 to +10 dB)</string>
+    <string name="pref_summary_replay_gain_preamp_no_tag">Adjust volume when gain tags are absent (-10 to +10 dB)</string>
 
     <string name="delete_action">Delete</string>
     <string name="remove_action">Remove</string>
@@ -209,6 +226,7 @@
     <string name="you_have_to_select_at_least_one_category">You have to select at least one category.</string>
     <string name="permissions_denied">Permissions denied</string>
     <string name="permission_external_storage_denied">Permission to access external storage denied.</string>
+    <string name="permission_notifications_denied">Notification permission denied. Downloads and playback controls require notifications.</string>
 
     <string name="sort_order_ascending">Ascending</string>
     <string name="sort_order_descending">Descending</string>

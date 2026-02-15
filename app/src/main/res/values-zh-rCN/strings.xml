@@ -226,5 +226,13 @@
     <string name="error_empty_server">请填入服务器地址。</string>
     <string name="error_unexpected">一个意料之外的问题发生了。</string>
     <string name="error_empty_username">请填入用户名</string>
+    <string name="pref_title_gain_adjustment">增益调整</string>
+    <string name="pref_summary_gain_adjustment">调整播放器输出的增益</string>
+    <string name="pref_title_replay_gain">ReplayGain</string>
+    <string name="pref_summary_replay_gain">使用服务器分析的增益数据标准化音量</string>
+    <string name="pref_title_replay_gain_preamp">前置放大（有标签）</string>
+    <string name="pref_summary_replay_gain_preamp">存在增益标签时调整音量（-10 至 +10 dB）</string>
+    <string name="pref_title_replay_gain_preamp_no_tag">前置放大（无标签）</string>
+    <string name="pref_summary_replay_gain_preamp_no_tag">缺少增益标签时调整音量（-10 至 +10 dB）</string>
 
 </resources>

@@ -2,6 +2,8 @@ package com.dkanada.gramophone.adapter.song;
 
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.PopupMenu;
 
 import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
@@ -15,6 +17,7 @@ import com.h6ah4i.android.widget.advrecyclerview.draggable.ItemDraggableRange;
 import com.h6ah4i.android.widget.advrecyclerview.draggable.annotation.DraggableItemStateFlags;
 import com.dkanada.gramophone.R;
 import com.dkanada.gramophone.helper.MusicPlayerRemote;
+import com.dkanada.gramophone.helper.menu.SongMenuHelper;
 import com.dkanada.gramophone.interfaces.CabHolder;
 import com.dkanada.gramophone.model.Song;
 import com.dkanada.gramophone.util.ViewUtil;
@@ -27,6 +30,16 @@ public class PlayingQueueAdapter extends SongAdapter implements DraggableItemAda
     private static final int NEXT = 2;
 
     private int current;
+    private OnDragStateChangedListener dragStateListener;
+
+    public interface OnDragStateChangedListener {
+        void onDragStarted();
+        void onDragFinished();
+    }
+
+    public void setOnDragStateChangedListener(OnDragStateChangedListener listener) {
+        this.dragStateListener = listener;
+    }
 
     public PlayingQueueAdapter(AppCompatActivity activity, List<Song> dataSet, int current, @LayoutRes int itemLayoutRes, boolean usePalette, @Nullable CabHolder cabHolder) {
         super(activity, dataSet, itemLayoutRes, usePalette, cabHolder);
@@ -101,7 +114,7 @@ public class PlayingQueueAdapter extends SongAdapter implements DraggableItemAda
 
     @Override
     public boolean onCheckCanStartDrag(ViewHolder holder, int position, int x, int y) {
-        return ViewUtil.hitTest(holder.imageText, x, y);
+        return ViewUtil.hitTest(holder.menu, x, y);
     }
 
     @Override
@@ -122,11 +135,17 @@ public class PlayingQueueAdapter extends SongAdapter implements DraggableItemAda
     @Override
     public void onItemDragStarted(int position) {
         notifyDataSetChanged();
+        if (dragStateListener != null) {
+            dragStateListener.onDragStarted();
+        }
     }
 
     @Override
     public void onItemDragFinished(int fromPosition, int toPosition, boolean result) {
         notifyDataSetChanged();
+        if (dragStateListener != null) {
+            dragStateListener.onDragFinished();
+        }
     }
 
     public class ViewHolder extends SongAdapter.ViewHolder implements DraggableItemViewHolder {
@@ -143,6 +162,12 @@ public class PlayingQueueAdapter extends SongAdapter implements DraggableItemAda
             if (image != null) {
                 image.setVisibility(View.GONE);
             }
+
+            // Replace overflow menu with drag handle
+            if (menu != null) {
+                ((ImageView) menu).setImageResource(R.drawable.ic_drag_vertical_white_24dp);
+                menu.setOnClickListener(null);
+            }
         }
 
         @Override
@@ -158,6 +183,23 @@ public class PlayingQueueAdapter extends SongAdapter implements DraggableItemAda
             }
 
             return super.onSongMenuItemClick(item);
+        }
+
+        @Override
+        public void onClick(View v) {
+            MusicPlayerRemote.playSongAt(getBindingAdapterPosition());
+        }
+
+        @Override
+        public boolean onLongClick(View view) {
+            PopupMenu popup = new PopupMenu(activity, itemView);
+            popup.inflate(getSongMenuRes());
+            popup.setOnMenuItemClickListener(item -> {
+                if (onSongMenuItemClick(item)) return true;
+                return SongMenuHelper.handleMenuClick(activity, getSong(), item.getItemId());
+            });
+            popup.show();
+            return true;
         }
 
         @Override

@@ -91,6 +91,13 @@ public class MusicUtil {
         return string == null ? "Unknown" : string.replaceAll("[\\x00-\\x1F\\x22\\x2A\\x2F\\x3A\\x3C\\x3E\\x3F\\x5C\\x7C\\x7F]", "");
     }
 
+    public static boolean deleteDownload(Song song) {
+        File audio = new File(getFileUri(song));
+        boolean fileDeleted = !audio.exists() || audio.delete();
+        App.getDatabase().cacheDao().deleteCache(song.id);
+        return fileDeleted;
+    }
+
     @NonNull
     public static Intent createShareSongFileIntent(@NonNull final Song song, Context context) {
         try {

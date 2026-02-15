@@ -3,7 +3,6 @@ package com.dkanada.gramophone.activities;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -135,10 +134,22 @@ public class MainActivity extends AbsMusicContentActivity implements CabHolder {
             binding.drawerLayout.closeDrawers();
             switch (menuItem.getItemId()) {
                 case R.id.nav_settings:
-                    new Handler().postDelayed(() -> startActivity(new Intent(MainActivity.this, SettingsActivity.class)), 200);
+                    binding.drawerLayout.addDrawerListener(new androidx.drawerlayout.widget.DrawerLayout.SimpleDrawerListener() {
+                        @Override
+                        public void onDrawerClosed(android.view.View drawerView) {
+                            binding.drawerLayout.removeDrawerListener(this);
+                            startActivity(new Intent(MainActivity.this, SettingsActivity.class));
+                        }
+                    });
                     break;
                 case R.id.nav_about:
-                    new Handler().postDelayed(() -> startActivity(new Intent(MainActivity.this, AboutActivity.class)), 200);
+                    binding.drawerLayout.addDrawerListener(new androidx.drawerlayout.widget.DrawerLayout.SimpleDrawerListener() {
+                        @Override
+                        public void onDrawerClosed(android.view.View drawerView) {
+                            binding.drawerLayout.removeDrawerListener(this);
+                            startActivity(new Intent(MainActivity.this, AboutActivity.class));
+                        }
+                    });
                     break;
                 case R.id.nav_logout:
                     onLogout = true;
@@ -147,8 +158,9 @@ public class MainActivity extends AbsMusicContentActivity implements CabHolder {
             }
 
             // only run the following code when a new library has been selected
-            if (menuItem.getItemId() == QueryUtil.currentLibrary.getId().hashCode()) return true;
+            if (QueryUtil.currentLibrary != null && menuItem.getItemId() == QueryUtil.currentLibrary.getId().hashCode()) return true;
 
+            if (libraries == null) return true;
             for (BaseItemDto itemDto : libraries) {
                 if (menuItem.getItemId() == itemDto.getId().hashCode()) {
                     QueryUtil.currentLibrary = itemDto;

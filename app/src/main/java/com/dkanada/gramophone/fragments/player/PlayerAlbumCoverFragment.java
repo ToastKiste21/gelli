@@ -64,9 +64,9 @@ public class PlayerAlbumCoverFragment extends AbsMusicServiceFragment implements
 
     @Override
     public void onDestroyView() {
-        super.onDestroyView();
-
         binding.playerAlbumCoverViewPager.removeOnPageChangeListener(this);
+        super.onDestroyView();
+        binding = null;
     }
 
     @Override

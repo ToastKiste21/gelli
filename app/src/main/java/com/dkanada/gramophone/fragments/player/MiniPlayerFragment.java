@@ -101,6 +101,12 @@ public class MiniPlayerFragment extends AbsMusicServiceFragment implements Music
     }
 
     @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
         progressViewUpdateHelper.start();

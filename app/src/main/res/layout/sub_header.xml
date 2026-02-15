@@ -6,5 +6,5 @@
     android:gravity="center_vertical"
     android:paddingLeft="16dp"
     android:paddingRight="16dp"
-    android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+    android:textAppearance="@style/TextAppearance.Material3.LabelLarge"
     android:textColor="?android:textColorSecondary" />

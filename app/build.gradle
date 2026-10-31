@@ -8,8 +8,8 @@ android {
         minSdkVersion 21
         targetSdk 34
 
-        versionCode 19
-        versionName '1.4.0'
+        versionCode 20
+        versionName '1.4.1'
 
         multiDexEnabled true
         vectorDrawables {
@@ -19,10 +19,12 @@ android {
 
     signingConfigs {
         release {
+            // CI passes these as environment variables, locally they can go into
+            // ~/.gradle/gradle.properties so they stay out of the repository
             storeFile file('../store.jks')
-            storePassword System.getenv('STORE_PASSWORD')
-            keyAlias System.getenv('KEY_ALIAS')
-            keyPassword System.getenv('KEY_PASSWORD')
+            storePassword findProperty('gelliStorePassword') ?: System.getenv('STORE_PASSWORD')
+            keyAlias findProperty('gelliKeyAlias') ?: System.getenv('KEY_ALIAS')
+            keyPassword findProperty('gelliKeyPassword') ?: System.getenv('KEY_PASSWORD')
         }
     }
 

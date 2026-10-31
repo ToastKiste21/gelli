@@ -1,12 +1,8 @@
-package com.dkanada.gramophone.service;
+package com.dkanada.gramophone.helper;
 
-import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.os.IBinder;
 import android.widget.Toast;
-
-import androidx.annotation.Nullable;
 
 import com.dkanada.gramophone.App;
 import com.dkanada.gramophone.BuildConfig;
@@ -19,35 +15,32 @@ import org.jellyfin.apiclient.interaction.Response;
 import org.jellyfin.apiclient.model.session.ClientCapabilities;
 import org.jellyfin.apiclient.model.system.SystemInfo;
 
-public class LoginService extends Service {
-    public static final String PACKAGE_NAME = BuildConfig.APPLICATION_ID;
+/**
+ * Re-authenticates the stored user against the server and broadcasts the result.
+ *
+ * <p>This used to be a {@code Service} started from {@code Activity.onResume()}. Android 12
+ * forbids starting a background service from a process the system already considers background,
+ * which it does when the activity resumes while the screen is off, so the app crashed with
+ * {@code BackgroundServiceStartNotAllowedException} on launch. None of the work needs a service:
+ * the api client call is already asynchronous, so it runs here directly.
+ */
+public final class LoginHelper {
+    private static final String PACKAGE_NAME = BuildConfig.APPLICATION_ID;
 
     public static final String STATE_POLLING = PACKAGE_NAME + ".unknown";
     public static final String STATE_ONLINE = PACKAGE_NAME + ".online";
     public static final String STATE_OFFLINE = PACKAGE_NAME + ".offline";
 
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        Intent pollingIntent = new Intent(STATE_POLLING);
-        pollingIntent.setPackage(getPackageName());
-        sendBroadcast(pollingIntent);
-        authenticate();
-
-        return super.onStartCommand(intent, flags, startId);
+    private LoginHelper() {
     }
 
-    @Nullable
-    @Override
-    public IBinder onBind(Intent intent) {
-        return null;
-    }
+    public static void refresh(Context context) {
+        Context appContext = context.getApplicationContext();
+        broadcast(appContext, STATE_POLLING);
 
-    private void authenticate() {
-        User user = App.getDatabase().userDao().getUser(PreferenceUtil.getInstance(this).getUser());
-        Context context = this;
-
+        User user = App.getDatabase().userDao().getUser(PreferenceUtil.getInstance(appContext).getUser());
         if (user == null) {
-            Toast.makeText(this, context.getResources().getString(R.string.error_unexpected), Toast.LENGTH_SHORT).show();
+            Toast.makeText(appContext, appContext.getResources().getString(R.string.error_unexpected), Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -60,20 +53,23 @@ public class LoginService extends Service {
                 clientCapabilities.setSupportsMediaControl(true);
                 clientCapabilities.setSupportsPersistentIdentifier(true);
 
-                App.getApiClient().ensureWebSocket();
+                App.getWebSocket().ensureConnected();
                 App.getApiClient().ReportCapabilities(clientCapabilities, new EmptyResponse());
 
-                Intent onlineIntent = new Intent(STATE_ONLINE);
-                onlineIntent.setPackage(getPackageName());
-                sendBroadcast(onlineIntent);
+                broadcast(appContext, STATE_ONLINE);
             }
 
             @Override
             public void onError(Exception exception) {
-                Intent offlineIntent = new Intent(STATE_OFFLINE);
-                offlineIntent.setPackage(getPackageName());
-                sendBroadcast(offlineIntent);
+                broadcast(appContext, STATE_OFFLINE);
             }
         });
+    }
+
+    private static void broadcast(Context context, String action) {
+        Intent intent = new Intent(action);
+        intent.setPackage(context.getPackageName());
+
+        context.sendBroadcast(intent);
     }
 }

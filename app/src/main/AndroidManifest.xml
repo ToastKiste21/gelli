@@ -78,8 +78,6 @@
         <service android:name=".service.DownloadService"
             android:exported="false"
             android:foregroundServiceType="dataSync" />
-        <service android:name=".service.LoginService"
-            android:exported="false" />
         <service android:name=".service.MusicService"
             android:exported="false"
             android:foregroundServiceType="mediaPlayback" />

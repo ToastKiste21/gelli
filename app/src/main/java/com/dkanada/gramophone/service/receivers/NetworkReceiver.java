@@ -6,7 +6,7 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
-import com.dkanada.gramophone.service.LoginService;
+import com.dkanada.gramophone.helper.LoginHelper;
 
 public class NetworkReceiver extends BroadcastReceiver {
     @Override
@@ -16,11 +16,11 @@ public class NetworkReceiver extends BroadcastReceiver {
 
         // network info will be null in airplane mode
         if (networkInfo != null && networkInfo.isConnected()) {
-            Intent onlineIntent = new Intent(LoginService.STATE_ONLINE);
+            Intent onlineIntent = new Intent(LoginHelper.STATE_ONLINE);
             onlineIntent.setPackage(context.getPackageName());
             context.sendBroadcast(onlineIntent);
         } else {
-            Intent offlineIntent = new Intent(LoginService.STATE_OFFLINE);
+            Intent offlineIntent = new Intent(LoginHelper.STATE_OFFLINE);
             offlineIntent.setPackage(context.getPackageName());
             context.sendBroadcast(offlineIntent);
         }

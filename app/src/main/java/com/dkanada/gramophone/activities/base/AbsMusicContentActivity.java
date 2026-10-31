@@ -10,8 +10,8 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 
 import com.dkanada.gramophone.App;
+import com.dkanada.gramophone.helper.LoginHelper;
 import com.dkanada.gramophone.interfaces.StateListener;
-import com.dkanada.gramophone.service.LoginService;
 import com.dkanada.gramophone.util.NavigationUtil;
 
 public abstract class AbsMusicContentActivity extends AbsMusicPanelActivity implements StateListener {
@@ -21,10 +21,10 @@ public abstract class AbsMusicContentActivity extends AbsMusicPanelActivity impl
             if (intent.getAction() == null) return;
 
             switch(intent.getAction()) {
-                case LoginService.STATE_ONLINE:
+                case LoginHelper.STATE_ONLINE:
                     onStateOnline();
                     break;
-                case LoginService.STATE_OFFLINE:
+                case LoginHelper.STATE_OFFLINE:
                     NavigationUtil.startLogin(context);
                     break;
             }
@@ -36,9 +36,9 @@ public abstract class AbsMusicContentActivity extends AbsMusicPanelActivity impl
         super.onCreate(savedInstanceState);
 
         final IntentFilter filter = new IntentFilter();
-        filter.addAction(LoginService.STATE_POLLING);
-        filter.addAction(LoginService.STATE_ONLINE);
-        filter.addAction(LoginService.STATE_OFFLINE);
+        filter.addAction(LoginHelper.STATE_POLLING);
+        filter.addAction(LoginHelper.STATE_ONLINE);
+        filter.addAction(LoginHelper.STATE_OFFLINE);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED);
@@ -47,7 +47,7 @@ public abstract class AbsMusicContentActivity extends AbsMusicPanelActivity impl
         }
 
         if (App.getApiClient() == null) {
-            startService(new Intent(this, LoginService.class));
+            LoginHelper.refresh(this);
         } else {
             onStateOnline();
         }
@@ -58,7 +58,7 @@ public abstract class AbsMusicContentActivity extends AbsMusicPanelActivity impl
         super.onResume();
 
         if (App.getApiClient() == null) {
-            startService(new Intent(this, LoginService.class));
+            LoginHelper.refresh(this);
         }
     }
 

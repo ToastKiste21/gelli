@@ -58,7 +58,8 @@ public class MusicUtil {
         // preferred codec when transcoding
         // ToDo: Think about removing this. The server doesn't seem to respect it anyways
         builder.append("&AudioCodec=").append(preferenceUtil.getTranscodeCodec());
-        builder.append("&api_key=").append(apiClient.getAccessToken());
+
+        // the access token goes into the Authorization header, see JellyfinAuth
 
         Log.i(MusicUtil.class.getName(), "playing audio: " + builder);
         return builder.toString();
@@ -72,7 +73,7 @@ public class MusicUtil {
         builder.append(song.id);
         builder.append("/Download");
 
-        builder.append("?api_key=").append(App.getApiClient().getAccessToken());
+        // the access token goes into the Authorization header, see JellyfinAuth
 
         return builder.toString();
     }

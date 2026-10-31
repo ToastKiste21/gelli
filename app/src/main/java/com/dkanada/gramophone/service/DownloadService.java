@@ -15,6 +15,7 @@ import com.dkanada.gramophone.R;
 import com.dkanada.gramophone.database.Cache;
 import com.dkanada.gramophone.model.Song;
 import com.dkanada.gramophone.service.notifications.DownloadNotification;
+import com.dkanada.gramophone.network.JellyfinAuth;
 import com.dkanada.gramophone.util.MusicUtil;
 
 import java.io.File;
@@ -125,6 +126,9 @@ public class DownloadService extends Service {
 
                 URL url = new URL(MusicUtil.getDownloadUri(song));
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
+                String authorization = JellyfinAuth.header();
+                if (authorization != null) connection.setRequestProperty(JellyfinAuth.AUTH_HEADER, authorization);
                 connection.connect();
 
                 int contentLength = connection.getContentLength();

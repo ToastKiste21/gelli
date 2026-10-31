@@ -3,6 +3,7 @@ package com.dkanada.gramophone.util;
 import android.util.Log;
 
 import com.dkanada.gramophone.App;
+import com.dkanada.gramophone.network.JellyfinAuth;
 
 import org.json.JSONObject;
 
@@ -19,14 +20,16 @@ public class ReplayGainFetcher {
         try {
             String serverUrl = App.getApiClient().getApiUrl();
             String userId = App.getApiClient().getCurrentUserId();
-            String token = App.getApiClient().getAccessToken();
 
-            String url = serverUrl + "/Users/" + userId + "/Items/" + itemId + "?api_key=" + token;
+            String url = serverUrl + "/Users/" + userId + "/Items/" + itemId;
             connection = (HttpURLConnection) new URL(url).openConnection();
             connection.setConnectTimeout(5000);
             connection.setReadTimeout(5000);
             connection.setRequestMethod("GET");
             connection.setRequestProperty("Accept", "application/json");
+
+            String authorization = JellyfinAuth.header();
+            if (authorization != null) connection.setRequestProperty(JellyfinAuth.AUTH_HEADER, authorization);
 
             int responseCode = connection.getResponseCode();
             if (responseCode != 200) {

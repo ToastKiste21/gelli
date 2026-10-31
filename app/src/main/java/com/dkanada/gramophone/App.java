@@ -11,13 +11,14 @@ import androidx.room.Room;
 import com.dkanada.gramophone.database.JellyDatabase;
 import com.google.android.material.color.DynamicColors;
 import com.dkanada.gramophone.helper.EventListener;
+import com.dkanada.gramophone.network.JellyfinHttpClient;
+import com.dkanada.gramophone.network.JellyfinWebSocket;
 import com.dkanada.gramophone.util.PreferenceUtil;
 import com.dkanada.gramophone.views.shortcuts.DynamicShortcutManager;
 import com.melegy.redscreenofdeath.RedScreenOfDeath;
 
 import org.jellyfin.apiclient.interaction.AndroidDevice;
 import org.jellyfin.apiclient.interaction.ApiClient;
-import org.jellyfin.apiclient.interaction.VolleyHttpClient;
 import org.jellyfin.apiclient.interaction.device.IDevice;
 import org.jellyfin.apiclient.interaction.http.IAsyncHttpClient;
 import org.jellyfin.apiclient.logging.AndroidLogger;
@@ -28,6 +29,7 @@ public class App extends Application {
 
     private static JellyDatabase database;
     private static ApiClient apiClient;
+    private static JellyfinWebSocket webSocket;
 
     @Override
     public void onCreate() {
@@ -41,6 +43,7 @@ public class App extends Application {
         DynamicColors.applyToActivitiesIfAvailable(this);
         database = createDatabase(this);
         apiClient = createApiClient(this);
+        webSocket = new JellyfinWebSocket(new AndroidLogger(App.class.getName()), new EventListener(), apiClient);
 
         if (database.userDao().getUsers().size() == 0) {
             PreferenceUtil.getInstance(this).setServer(null);
@@ -74,7 +77,7 @@ public class App extends Application {
         String server = PreferenceUtil.getInstance(context).getServer();
 
         ILogger logger = new AndroidLogger(context.getClass().getName());
-        IAsyncHttpClient httpClient = new VolleyHttpClient(logger, context);
+        IAsyncHttpClient httpClient = new JellyfinHttpClient(logger, context);
         IDevice device = new AndroidDevice(deviceId, deviceName);
         EventListener eventListener = new EventListener();
 
@@ -87,6 +90,10 @@ public class App extends Application {
 
     public static ApiClient getApiClient() {
         return apiClient;
+    }
+
+    public static JellyfinWebSocket getWebSocket() {
+        return webSocket;
     }
 
     public static App getInstance() {

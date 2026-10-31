@@ -19,6 +19,7 @@ import androidx.media3.common.util.UnstableApi;
 import androidx.media3.database.StandaloneDatabaseProvider;
 import androidx.media3.datasource.DataSource;
 import androidx.media3.datasource.DefaultDataSource;
+import androidx.media3.datasource.DefaultHttpDataSource;
 import androidx.media3.datasource.FileDataSource;
 import androidx.media3.datasource.cache.CacheDataSink;
 import androidx.media3.datasource.cache.CacheDataSource;
@@ -31,6 +32,7 @@ import androidx.media3.exoplayer.audio.AudioSink;
 import androidx.media3.exoplayer.audio.DefaultAudioSink;
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory;
 
+import com.dkanada.gramophone.network.JellyfinAuth;
 import com.dkanada.gramophone.R;
 import com.dkanada.gramophone.model.Song;
 import com.dkanada.gramophone.util.MusicUtil;
@@ -236,14 +238,21 @@ public class LocalPlayer implements Playback {
     }
 
     private DataSource.Factory buildDataSourceFactory() {
-        return () -> new CacheDataSource(
-                simpleCache,
-                new DefaultDataSource.Factory(context).createDataSource(),
-                new FileDataSource(),
-                new CacheDataSink(simpleCache, 10 * 1024 * 1024),
-                CacheDataSource.FLAG_BLOCK_ON_CACHE,
-                null
-        );
+        // resolved per data source so that a token obtained after this factory was built is used
+        return () -> {
+            DefaultHttpDataSource.Factory httpDataSourceFactory = new DefaultHttpDataSource.Factory()
+                    .setAllowCrossProtocolRedirects(true)
+                    .setDefaultRequestProperties(JellyfinAuth.headers());
+
+            return new CacheDataSource(
+                    simpleCache,
+                    new DefaultDataSource.Factory(context, httpDataSourceFactory).createDataSource(),
+                    new FileDataSource(),
+                    new CacheDataSink(simpleCache, 10 * 1024 * 1024),
+                    CacheDataSource.FLAG_BLOCK_ON_CACHE,
+                    null
+            );
+        };
     }
 
     @Override

@@ -797,7 +797,7 @@ public class MusicService extends Service implements SharedPreferences.OnSharedP
             startInfo.setCanSeek(true);
             startInfo.setIsPaused(false);
 
-            App.getApiClient().ensureWebSocket();
+            App.getWebSocket().ensureConnected();
             App.getApiClient().ReportPlaybackStartAsync(startInfo, new EmptyResponse());
 
             // ReplayGain: fetch and apply normalization gain

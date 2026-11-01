@@ -96,6 +96,7 @@ public class MusicUtil {
         File audio = new File(getFileUri(song));
         boolean fileDeleted = !audio.exists() || audio.delete();
         App.getDatabase().cacheDao().deleteCache(song.id);
+        DownloadCache.notifyChanged();
         return fileDeleted;
     }
 

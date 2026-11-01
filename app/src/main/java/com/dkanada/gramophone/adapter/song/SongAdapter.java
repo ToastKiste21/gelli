@@ -1,6 +1,8 @@
 package com.dkanada.gramophone.adapter.song;
 
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -12,6 +14,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.util.Pair;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.dkanada.gramophone.App;
 import com.dkanada.gramophone.util.ThemeUtil;
@@ -26,6 +29,7 @@ import com.dkanada.gramophone.helper.menu.SongsMenuHelper;
 import com.dkanada.gramophone.interfaces.CabHolder;
 import com.dkanada.gramophone.model.Album;
 import com.dkanada.gramophone.model.Song;
+import com.dkanada.gramophone.util.DownloadCache;
 import com.dkanada.gramophone.util.MusicUtil;
 import com.dkanada.gramophone.util.NavigationUtil;
 import com.dkanada.gramophone.util.PreferenceUtil;
@@ -34,6 +38,7 @@ import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class SongAdapter extends AbsMultiSelectAdapter<SongAdapter.ViewHolder, Song> implements FastScrollRecyclerView.SectionedAdapter {
@@ -44,6 +49,14 @@ public class SongAdapter extends AbsMultiSelectAdapter<SongAdapter.ViewHolder, S
 
     protected boolean usePalette;
     protected boolean showSectionName;
+
+    /** one shared thread instead of a new, never shut down executor per refresh */
+    private static final ExecutorService cacheExecutor = Executors.newSingleThreadExecutor();
+
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
+    private final Runnable cacheListener = this::refreshCachedIds;
+
+    private RecyclerView recyclerView;
 
     private volatile Set<String> cachedIds = new HashSet<>();
 
@@ -64,11 +77,48 @@ public class SongAdapter extends AbsMultiSelectAdapter<SongAdapter.ViewHolder, S
         refreshCachedIds();
     }
 
+    /**
+     * The read is asynchronous, so the rows have to be rebound once it lands -- otherwise the
+     * indicator shows whatever the table held when this adapter was built.
+     */
     public void refreshCachedIds() {
-        Executors.newSingleThreadExecutor().execute(() -> {
-            List<String> ids = App.getDatabase().cacheDao().getAllCachedIds();
-            cachedIds = new HashSet<>(ids);
+        cacheExecutor.execute(() -> {
+            Set<String> ids = new HashSet<>(App.getDatabase().cacheDao().getAllCachedIds());
+
+            mainHandler.post(() -> {
+                if (ids.equals(cachedIds)) return;
+
+                cachedIds = ids;
+                notifyCacheChanged();
+            });
         });
+    }
+
+    /** notifyDataSetChanged() throws while the RecyclerView is laying out, so wait it out */
+    private void notifyCacheChanged() {
+        if (recyclerView != null && recyclerView.isComputingLayout()) {
+            recyclerView.post(this::notifyCacheChanged);
+            return;
+        }
+
+        notifyDataSetChanged();
+    }
+
+    @Override
+    public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
+        super.onAttachedToRecyclerView(recyclerView);
+
+        this.recyclerView = recyclerView;
+        DownloadCache.addListener(cacheListener);
+        refreshCachedIds();
+    }
+
+    @Override
+    public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
+        DownloadCache.removeListener(cacheListener);
+        this.recyclerView = null;
+
+        super.onDetachedFromRecyclerView(recyclerView);
     }
 
     public void swapDataSet(List<Song> dataSet) {

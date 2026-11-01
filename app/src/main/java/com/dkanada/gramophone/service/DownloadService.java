@@ -16,6 +16,7 @@ import com.dkanada.gramophone.database.Cache;
 import com.dkanada.gramophone.model.Song;
 import com.dkanada.gramophone.service.notifications.DownloadNotification;
 import com.dkanada.gramophone.network.JellyfinAuth;
+import com.dkanada.gramophone.util.DownloadCache;
 import com.dkanada.gramophone.util.MusicUtil;
 
 import java.io.File;
@@ -77,6 +78,7 @@ public class DownloadService extends Service {
                                 continue;
                             }
                             App.getDatabase().cacheDao().deleteCache(song.id);
+                            DownloadCache.notifyChanged();
                         }
 
                         notification.start(song);
@@ -159,6 +161,7 @@ public class DownloadService extends Service {
                 }
 
                 App.getDatabase().cacheDao().insertCache(new Cache(song));
+                DownloadCache.notifyChanged();
                 onDownloadFinished(song, true);
 
             } catch (Exception e) {

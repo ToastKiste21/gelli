@@ -132,7 +132,7 @@ public class DownloadService extends Service {
                 connection.connect();
 
                 int contentLength = connection.getContentLength();
-                notification.update(0, contentLength > 0 ? contentLength : (int) song.size);
+                notification.update(song, 0, contentLength);
 
                 try (InputStream input = connection.getInputStream();
                      OutputStream output = new FileOutputStream(tempFile)) {
@@ -142,7 +142,7 @@ public class DownloadService extends Service {
 
                     while ((count = input.read(data)) != -1) {
                         output.write(data, 0, count);
-                        notification.update(count, 0);
+                        notification.update(song, count, 0);
                     }
                 }
 

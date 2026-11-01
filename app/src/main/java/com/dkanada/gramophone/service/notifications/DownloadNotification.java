@@ -7,6 +7,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Build;
+import android.os.SystemClock;
 
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
@@ -17,7 +18,9 @@ import com.dkanada.gramophone.model.Song;
 import com.dkanada.gramophone.service.DownloadService;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static android.content.Context.NOTIFICATION_SERVICE;
@@ -30,11 +33,23 @@ public class DownloadNotification {
     private final Service service;
     private final NotificationManager notificationManager;
 
+    /**
+     * Android drops everything above roughly five notifications per second, and each rebuild is a
+     * synchronous binder call. Posting one per 8 KiB chunk made the progress bar invisible and
+     * slowed the transfer, so updates are throttled to this interval.
+     */
+    private static final long NOTIFY_INTERVAL_MS = 500;
+
     private final List<Song> pendingSongs;
 
-    private int currentBytes;
-    private int totalBytes;
+    /** song id to bytes already read, for every download currently in flight */
+    private final Map<String, Long> activeBytes;
+
+    private long batchTotalBytes;
+    private long finishedBytes;
     private boolean foregroundStarted;
+
+    private long lastNotifyAt;
 
     private String currentSongTitle;
     private int totalQueued;
@@ -46,6 +61,7 @@ public class DownloadNotification {
         this.service = service;
 
         this.pendingSongs = new ArrayList<>();
+        this.activeBytes = new LinkedHashMap<>();
     }
 
     public synchronized void ensureForeground() {
@@ -62,40 +78,73 @@ public class DownloadNotification {
     public synchronized void start(Song song) {
         this.pendingSongs.add(song);
         this.totalQueued++;
+        if (song.size > 0) this.batchTotalBytes += song.size;
 
         ensureForeground();
     }
 
-    public synchronized void startSong(Song song) {
-        this.currentSongTitle = song.title;
-        this.currentBytes = 0;
-        this.totalBytes = 0;
+    public void startSong(Song song) {
+        Notification notification;
+        synchronized (this) {
+            activeBytes.put(song.id, 0L);
+            currentSongTitle = song.title;
+            lastNotifyAt = SystemClock.elapsedRealtime();
 
-        notificationManager.notify(NOTIFICATION_ID, buildProgressNotification());
-    }
-
-    public synchronized void update(int bytesRead, int contentLength) {
-        this.currentBytes += bytesRead;
-        if (contentLength > 0) {
-            this.totalBytes = contentLength;
+            notification = buildProgressNotification();
         }
 
-        notificationManager.notify(NOTIFICATION_ID, buildProgressNotification());
+        notificationManager.notify(NOTIFICATION_ID, notification);
+    }
+
+    /**
+     * Called once per read, so for a single track this runs thousands of times. Bytes are always
+     * accumulated; the notification itself is only rebuilt and posted every
+     * {@link #NOTIFY_INTERVAL_MS}.
+     */
+    public void update(Song song, int bytesRead, int contentLength) {
+        Notification notification;
+        synchronized (this) {
+            Long previous = activeBytes.get(song.id);
+            activeBytes.put(song.id, (previous == null ? 0L : previous) + bytesRead);
+
+            // the server may disagree with the size the library reported
+            if (contentLength > 0 && song.size > 0 && contentLength != song.size) {
+                batchTotalBytes += contentLength - song.size;
+                song.size = contentLength;
+            } else if (contentLength > 0 && song.size <= 0) {
+                batchTotalBytes += contentLength;
+                song.size = contentLength;
+            }
+
+            long now = SystemClock.elapsedRealtime();
+            if (now - lastNotifyAt < NOTIFY_INTERVAL_MS) return;
+            lastNotifyAt = now;
+
+            notification = buildProgressNotification();
+        }
+
+        // outside the lock: notify() is a binder round trip and would serialise every download thread
+        notificationManager.notify(NOTIFICATION_ID, notification);
     }
 
     public synchronized void stop(Song song, boolean success) {
         if (song != null) {
             pendingSongs.remove(song);
+            activeBytes.remove(song.id);
             if (success) {
                 completedCount++;
+                if (song.size > 0) finishedBytes += song.size;
             } else {
                 failedCount++;
+                if (song.size > 0) batchTotalBytes -= song.size;
             }
         } else {
             pendingSongs.clear();
+            activeBytes.clear();
         }
 
         if (pendingSongs.size() != 0) {
+            lastNotifyAt = SystemClock.elapsedRealtime();
             notificationManager.notify(NOTIFICATION_ID, buildProgressNotification());
             return;
         }
@@ -106,8 +155,10 @@ public class DownloadNotification {
 
         showSummaryNotification();
 
-        currentBytes = 0;
-        totalBytes = 0;
+        activeBytes.clear();
+        batchTotalBytes = 0;
+        finishedBytes = 0;
+        lastNotifyAt = 0;
         currentSongTitle = null;
         totalQueued = 0;
         completedCount = 0;
@@ -144,11 +195,13 @@ public class DownloadNotification {
             .setOngoing(true)
             .setOnlyAlertOnce(true);
 
-        if (totalBytes > 0) {
-            int clampedBytes = Math.min(currentBytes, totalBytes);
-            builder.setProgress(totalBytes, clampedBytes, false);
+        // aggregate over the batch, so parallel downloads cannot make the bar jump backwards
+        long readBytes = finishedBytes;
+        for (Long value : activeBytes.values()) readBytes += value;
 
-            int percent = (int) ((clampedBytes / (float) totalBytes) * 100);
+        if (batchTotalBytes > 0) {
+            int percent = (int) Math.min(100, (readBytes * 100) / batchTotalBytes);
+            builder.setProgress(100, percent, false);
             builder.setSubText(percent + "%");
         } else {
             builder.setProgress(0, 0, true);

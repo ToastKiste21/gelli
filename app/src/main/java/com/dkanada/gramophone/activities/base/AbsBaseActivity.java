@@ -32,6 +32,8 @@ public abstract class AbsBaseActivity extends AbsThemeActivity {
     private List<String> permissions;
     private boolean allowed;
 
+    private final Handler dialogHandler = new Handler();
+
     @Override
     @TargetApi(Build.VERSION_CODES.M)
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,28 +52,58 @@ public abstract class AbsBaseActivity extends AbsThemeActivity {
             return;
         }
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this)
-            .setNegativeButton(R.string.ignore, (dialog, id) -> showWarning());
+        // Ask for the runtime permissions first, and independently of the battery prompt.
+        // POST_NOTIFICATIONS gates downloads and the playing notification, and the old chain could
+        // never reach requestPermissions(): shouldShowRequestPermissionRationale() returns false
+        // until the system dialog has been shown once, so a fresh install fell straight through to
+        // the "open settings" branch and the system never asked at all.
+        if (permissions.size() != 0 && !checkPermissions()) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, permissions.get(0))) {
+                showDelayedDialog(getPermissionMessage(), getString(R.string.permissions_denied),
+                    getString(R.string.action_grant), (dialog, id) -> requestPermissions());
+            } else {
+                // never asked, or permanently denied; the callback tells the two apart
+                requestPermissions();
+            }
 
-        if (!checkBatteryOptimization()) {
-            builder.setMessage(R.string.battery_optimizations_message)
-                .setTitle(R.string.battery_optimizations_title)
-                .setPositiveButton(R.string.disable, (dialog, id) -> requestBatteryOptimization());
-
-            new Handler().postDelayed(builder::show, 2000);
-        } else if (permissions.size() != 0 && ActivityCompat.shouldShowRequestPermissionRationale(this, permissions.get(0))) {
-            builder.setMessage(getPermissionMessage())
-                .setTitle(R.string.permissions_denied)
-                .setPositiveButton(R.string.action_grant, (dialog, id) -> requestPermissions());
-
-            new Handler().postDelayed(builder::show, 2000);
-        } else if (!checkPermissions()) {
-            builder.setMessage(getPermissionMessage())
-                .setTitle(R.string.permissions_denied)
-                .setPositiveButton(R.string.action_settings, (dialog, id) -> NavigationUtil.openSettings(this));
-
-            new Handler().postDelayed(builder::show, 2000);
+            return;
         }
+
+        showBatteryDialogIfNeeded();
+    }
+
+    @TargetApi(Build.VERSION_CODES.M)
+    private void showBatteryDialogIfNeeded() {
+        if (checkBatteryOptimization()) return;
+
+        showDelayedDialog(getString(R.string.battery_optimizations_message),
+            getString(R.string.battery_optimizations_title),
+            getString(R.string.disable), (dialog, id) -> requestBatteryOptimization());
+    }
+
+    /**
+     * The delay exists so the dialog does not fight the activity transition. The activity can be
+     * finished inside that window, so the callback is cancelled in onDestroy and guarded here --
+     * otherwise show() throws BadTokenException on a dead window.
+     */
+    private void showDelayedDialog(String message, String title, String positive, android.content.DialogInterface.OnClickListener action) {
+        dialogHandler.postDelayed(() -> {
+            if (isFinishing() || isDestroyed()) return;
+
+            new AlertDialog.Builder(this)
+                .setNegativeButton(R.string.ignore, (dialog, id) -> showWarning())
+                .setMessage(message)
+                .setTitle(title)
+                .setPositiveButton(positive, action)
+                .show();
+        }, 2000);
+    }
+
+    @Override
+    protected void onDestroy() {
+        dialogHandler.removeCallbacksAndMessages(null);
+
+        super.onDestroy();
     }
 
     @Override
@@ -158,9 +190,20 @@ public abstract class AbsBaseActivity extends AbsThemeActivity {
 
         for (int result : results) {
             if (result != PackageManager.PERMISSION_GRANTED) {
-                showWarning();
+                if (this instanceof MainActivity
+                        && this.permissions.size() != 0
+                        && !ActivityCompat.shouldShowRequestPermissionRationale(this, this.permissions.get(0))) {
+                    // permanently denied: the system dialog will not appear again
+                    showDelayedDialog(getPermissionMessage(), getString(R.string.permissions_denied),
+                        getString(R.string.action_settings), (dialog, id) -> NavigationUtil.openSettings(this));
+                } else {
+                    showWarning();
+                }
+
                 return;
             }
         }
+
+        if (this instanceof MainActivity) showBatteryDialogIfNeeded();
     }
 }
